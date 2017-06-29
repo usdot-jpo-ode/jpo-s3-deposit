@@ -120,7 +120,7 @@ public class ConsumerExample {
 					Region usWest2 = Region.getRegion(Regions.US_EAST_1);
 					s3.setRegion(usWest2);
 
-					String key = "MyObjectKey";
+					String key = "ingest/MyObjectKey";
 
 					System.out.println("===========================================");
 					System.out.println("Getting Started with Amazon S3");
