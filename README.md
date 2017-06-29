@@ -1,4 +1,4 @@
-# Kafka Consumer Example
+# S3 Deposit Service
 
 This project is intended to serve as a sample consumer application to subscribe to a Kafka topic of streams. After the ODE is up and running, this example project will showcase how you can build a Java application to subscribe to the outputs of a Kafka Stream.
 
