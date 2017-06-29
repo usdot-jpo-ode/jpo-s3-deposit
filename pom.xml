@@ -37,7 +37,12 @@
         <artifactId>commons-lang3</artifactId>
         <version>3.0</version>
     </dependency>
-
+    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk</artifactId>
+      <version>1.11.106</version>
+    </dependency>
 
   </dependencies>
   <build>
@@ -50,7 +55,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.consumerexample.app.ConsumerExample</mainClass>
+              <mainClass>consumerexample.app.ConsumerExample</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
