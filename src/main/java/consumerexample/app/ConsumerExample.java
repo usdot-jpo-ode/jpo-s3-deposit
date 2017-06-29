@@ -8,6 +8,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.apache.commons.cli.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,7 +20,6 @@ import us.dot.its.jpo.ode.util.SerializationUtils;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
-
 public class ConsumerExample {
 	
 	public static void main( String[] args )  throws IOException{
@@ -64,7 +64,7 @@ public class ConsumerExample {
 
 		//S3 properties
 		String bucketName     = "jpo-ode-test";
-		String keyName        = "ingest";
+		String keyName        = "ingest/wydot-bsm-";
 		String uploadFileName = "tester";
 
 
@@ -117,17 +117,21 @@ public class ConsumerExample {
 					}
 
 					AmazonS3 s3 = new AmazonS3Client(credentials);
-					Region usWest2 = Region.getRegion(Regions.US_EAST_1);
-					s3.setRegion(usWest2);
+					Region usEast1 = Region.getRegion(Regions.US_EAST_1);
+					s3.setRegion(usEast1);
 
-					String key = "ingest/MyObjectKey";
 
 					System.out.println("===========================================");
 					System.out.println("Getting Started with Amazon S3");
 					System.out.println("===========================================\n");
 
-
+					long time = System.currentTimeMillis();
+					String timeStamp = Long.toString(time);
 					try {
+						ObjectMetadata objectMetadata = new ObjectMetadata();
+						objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+						PutObjectRequest putRequest = new PutObjectRequest(bucketName, keyName+timeStamp+".json", createSampleFile(record.value()));
+						putRequest.setMetadata(objectMetadata);
 
 
 
@@ -141,9 +145,7 @@ public class ConsumerExample {
              * specific to your applications.
              */
 						System.out.println("Uploading a new object to S3 from a file\n");
-						s3.putObject(new PutObjectRequest(bucketName, key, createSampleFile()));
-
-
+						s3.putObject(putRequest);
 
 					} catch (AmazonServiceException ase) {
 						System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -166,16 +168,12 @@ public class ConsumerExample {
 		}
 	}
 
-	private static File createSampleFile() throws IOException {
-		File file = File.createTempFile("aws-java-sdk-", ".txt");
+	private static File createSampleFile(String json) throws IOException {
+		File file = File.createTempFile("aws-java-sdk-", ".json");
 		file.deleteOnExit();
 
 		Writer writer = new OutputStreamWriter(new FileOutputStream(file));
-		writer.write("abcdefghijklmnopqrstuvwxyz\n");
-		writer.write("01234567890112345678901234\n");
-		writer.write("!@#$%^&*()-=[]{};':',.<>/?\n");
-		writer.write("01234567890112345678901234\n");
-		writer.write("abcdefghijklmnopqrstuvwxyz\n");
+		writer.write(json);
 		writer.close();
 
 		return file;
