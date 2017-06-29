@@ -63,7 +63,7 @@ public class ConsumerExample {
 		String type = cmd.getOptionValue("type");
 
 		//S3 properties
-		String bucketName     = "jpo-ode-test";
+		String bucketName     = "usdot-its-cvpilot-eval-bucket";
 		String keyName        = "ingest/wydot-bsm-";
 		String uploadFileName = "tester";
 
