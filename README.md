@@ -1,11 +1,10 @@
 # S3 Deposit Service
 
-This project is intended to serve as a sample consumer application to subscribe to a Kafka topic of streams. After the ODE is up and running, this example project will showcase how you can build a Java application to subscribe to the outputs of a Kafka Stream.
+This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined bucket. With the ODE is up and running, this project will run alongside as a seperate service.
 
 ## Quick Run
 
-
-The sample project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
+The project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
 
 ```
 mvn clean compile assembly:single install
@@ -23,7 +22,7 @@ usage: Consumer Example
  -type,--type <arg>            string|byte message type
 ```
 
-Example Usage As Of: 1/11/17
+Example Usage As Of: 6/29/17
 
 ``` 
 java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t topic.J2735Bsm -type byte
