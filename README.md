@@ -3,6 +3,12 @@
 This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined bucket. With the ODE is up and running, this project will run alongside as a seperate service.
 
 ## Quick Run
+The use of AWS S3 credentials is being read from the machine's environmental variables. Be sure to set them appropriately in your bash profile.
+
+```
+export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_KEY>
+```
 
 The project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
 
@@ -25,7 +31,7 @@ usage: Consumer Example
 Example Usage As Of: 6/29/17
 
 ``` 
-java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t topic.J2735Bsm -type byte
+java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t topic.J2735Bsm -type string
 ```
 
 It should return the following confirmation
