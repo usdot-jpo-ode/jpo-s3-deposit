@@ -3,6 +3,7 @@ package consumerexample.app;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -107,7 +108,8 @@ public class ConsumerExample {
 					System.out.print(record.value());
 					AWSCredentials credentials = null;
 					try {
-						credentials = new ProfileCredentialsProvider().getCredentials();
+						//credentials = new ProfileCredentialsProvider().getCredentials();
+						credentials = new EnvironmentVariableCredentialsProvider().getCredentials();
 					} catch (Exception e) {
 						throw new AmazonClientException(
 								"Cannot load the credentials from the credential profiles file. " +
