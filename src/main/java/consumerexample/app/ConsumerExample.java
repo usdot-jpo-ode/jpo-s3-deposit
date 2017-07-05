@@ -1,32 +1,51 @@
 package consumerexample.app;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import org.apache.commons.cli.*;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.util.SerializationUtils;
-
-import java.io.*;
-import java.util.Arrays;
-import java.util.Properties;
 public class ConsumerExample {
 	
 	public static void main( String[] args )  throws IOException{
 		
 		// Option parsing
 		Options options = new Options();
+		
+		Option bucket_name_option = new Option("s", "s3-bucket", true, "Bucket Name");
+		bucket_name_option.setRequired(true);
+		options.addOption(bucket_name_option);
+		
+		Option key_name_option = new Option("k", "key_name", true, "Key Name");
+		key_name_option.setRequired(true);
+		options.addOption(key_name_option);
 		
 		Option bootstrap_server = new Option("b", "bootstrap-server", true, "Endpoint ('ip:port')");
 		bootstrap_server.setRequired(true);
@@ -62,11 +81,15 @@ public class ConsumerExample {
 		String topic = cmd.getOptionValue("topic");
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
+		
 
 		//S3 properties
-		String bucketName     = "usdot-its-cvpilot-eval-bucket";
-		String keyName        = "ingest/wydot-bsm-";
-		String uploadFileName = "tester";
+		String bucketName = cmd.getOptionValue("s3-bucket");
+		String keyName = cmd.getOptionValue("key_name");
+		
+		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
+		System.out.printf("DEBUG - Key name: %s\n", keyName);
+		System.out.printf("DEBUG - Kafka topic: %s\n", topic);
 
 
 		// Properties for the kafka topic
@@ -108,7 +131,6 @@ public class ConsumerExample {
 					System.out.print(record.value());
 					AWSCredentials credentials = null;
 					try {
-						//credentials = new ProfileCredentialsProvider().getCredentials();
 						credentials = new EnvironmentVariableCredentialsProvider().getCredentials();
 					} catch (Exception e) {
 						throw new AmazonClientException(
