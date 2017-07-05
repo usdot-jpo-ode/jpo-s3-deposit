@@ -22,22 +22,27 @@ To run the jar, be sure to include the topic at the end and group id at the end.
 java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar     
 
 usage: Consumer Example
+ -s,--s3-bucket                Bucket Name
+ -k,--key                      Storage Key
  -b,--bootstrap-server <arg>   Endpoint ('ip:port')
  -g,--group <arg>              Consumer Group
  -t,--topic <arg>              Topic Name
  -type,--type <arg>            string|byte message type
 ```
-
-Example Usage As Of: 6/29/17
+Example Usage As Of: 7/05/17
 
 ``` 
-java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t topic.J2735Bsm -type string
+java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t j2735BsmRawJson -type string -s myBucketName -k myFileKey
 ```
 
 It should return the following confirmation
 
 ```
-Subscribed to topic topic.J2735Bsm
+DEBUG - Bucket name: myBucketName
+DEBUG - Key name: myFileKey 
+DEBUG - Kafka topic: j2735BsmRawJson
+
+Subscribed to topic j2735BsmRawJson 
 ```
 Triggering an upload into the ODE, the output should be seen decoded into JSON in the console.
 
