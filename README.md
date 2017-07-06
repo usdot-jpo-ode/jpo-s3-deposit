@@ -1,11 +1,16 @@
-# Kafka Consumer Example
+# S3 Deposit Service
 
-This project is intended to serve as a sample consumer application to subscribe to a Kafka topic of streams. After the ODE is up and running, this example project will showcase how you can build a Java application to subscribe to the outputs of a Kafka Stream.
+This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined bucket. With the ODE is up and running, this project will run alongside as a seperate service.
 
 ## Quick Run
+The use of AWS S3 credentials is being read from the machine's environmental variables. Be sure to set them appropriately in your bash profile.
 
+```
+export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
+export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_KEY>
+```
 
-The sample project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
+The project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
 
 ```
 mvn clean compile assembly:single install
@@ -24,11 +29,10 @@ usage: Consumer Example
  -t,--topic <arg>              Topic Name
  -type,--type <arg>            string|byte message type
 ```
-
 Example Usage As Of: 7/05/17
 
 ``` 
-java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t j2735BsmRawJson -type string -s myBucketName -k myFileKey 
+java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t j2735BsmRawJson -type string -s myBucketName -k myFileKey
 ```
 
 It should return the following confirmation
