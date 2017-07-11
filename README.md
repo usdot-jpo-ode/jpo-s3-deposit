@@ -56,7 +56,7 @@ With the Kafka installed locally on a machine, here are a few additional command
 
 The IP used is the location of the Kafka endpoints.
 
-####Create, alter, list, and describe topics.
+#### Create, alter, list, and describe topics.
 
 ```
 kafka-topics --zookeeper 192.168.1.151:2181 --list
@@ -65,13 +65,13 @@ t1
 t2
 ```
 
-####Read data from a Kafka topic and write it to standard output. 
+#### Read data from a Kafka topic and write it to standard output. 
 
 ```
 kafka-console-consumer --zookeeper 192.168.1.151:2181 --topic topic.J2735Bsm
 ```
 
-####Read data from standard output and write it to a Kafka topic. 
+#### Read data from standard output and write it to a Kafka topic. 
 
 ```
 kafka-console-producer --broker-list 192.168.1.151:9092 --topic topic.J2735Bsm 
