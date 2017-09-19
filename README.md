@@ -71,7 +71,7 @@ t2
 kafka-console-consumer --zookeeper 192.168.1.151:2181 --topic topic.J2735Bsm
 ```
 
-#### Read data from standard output and write it to a Kafka topic. 
+#### Push data from standard output and write it into a Kafka topic. 
 
 ```
 kafka-console-producer --broker-list 192.168.1.151:9092 --topic topic.J2735Bsm 
