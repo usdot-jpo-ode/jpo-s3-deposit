@@ -34,7 +34,11 @@ import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.util.SerializationUtils;
 public class ConsumerExample {
 	
-	public static void main( String[] args )  throws IOException{
+	public static void main( String[] args )  throws Exception{
+	   
+	   new FirehoseWriter().run();
+	   
+	   
 		
 		// Option parsing
 		Options options = new Options();
