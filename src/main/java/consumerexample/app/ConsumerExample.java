@@ -1,51 +1,59 @@
 package consumerexample.app;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.Properties;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehose;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseClientBuilder;
+import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
+import com.amazonaws.services.kinesisfirehose.model.PutRecordResult;
+import com.amazonaws.services.kinesisfirehose.model.Record;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-
+import org.apache.commons.cli.*;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.log4j.Logger;
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.util.SerializationUtils;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Properties;
 public class ConsumerExample {
-	
-	public static void main( String[] args )  throws IOException{
-		
+	private static final Logger log = Logger.getLogger(ConsumerRecord.class);
+
+
+	public static void main( String[] args )  throws Exception{
+
 		// Option parsing
 		Options options = new Options();
 		
+		Option destination_option = new Option("d", "destination", true, "Destination (s3 or firehose)");
+		destination_option.setRequired(true);
+		options.addOption(destination_option);
+		
 		Option bucket_name_option = new Option("s", "s3-bucket", true, "Bucket Name");
-		bucket_name_option.setRequired(true);
+		bucket_name_option.setRequired(false);
 		options.addOption(bucket_name_option);
 		
 		Option key_name_option = new Option("k", "key_name", true, "Key Name");
-		key_name_option.setRequired(true);
+		key_name_option.setRequired(false);
 		options.addOption(key_name_option);
+		
+		Option firehose_option = new Option("f", "firehose", true, "firehose");
+		firehose_option.setRequired(false);
+		options.addOption(firehose_option);
 		
 		Option bootstrap_server = new Option("b", "bootstrap-server", true, "Endpoint ('ip:port')");
 		bootstrap_server.setRequired(true);
@@ -82,10 +90,14 @@ public class ConsumerExample {
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
 		
+		String destination = cmd.getOptionValue("destination");
 
 		//S3 properties
 		String bucketName = cmd.getOptionValue("s3-bucket");
-		String keyName = cmd.getOptionValue("key_name");
+		String keyName = cmd.getOptionValue("firehose");
+
+		//Kinesis properties
+		String firehose = cmd.getOptionValue("firehose");
 		
 		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
 		System.out.printf("DEBUG - Key name: %s\n", keyName);
@@ -125,11 +137,15 @@ public class ConsumerExample {
 
 			stringConsumer.subscribe(Arrays.asList(topic));
 			System.out.println("Subscribed to topic " + topic);
+
+
 			while (true) {		
 				ConsumerRecords<String, String> records = stringConsumer.poll(100);
 				for (ConsumerRecord<String, String> record : records) {
 					System.out.print(record.value());
 					AWSCredentials credentials = null;
+
+					;
 					try {
 						credentials = new EnvironmentVariableCredentialsProvider().getCredentials();
 					} catch (Exception e) {
@@ -144,54 +160,84 @@ public class ConsumerExample {
 					Region usEast1 = Region.getRegion(Regions.US_EAST_1);
 					s3.setRegion(usEast1);
 
-
-					System.out.println("===========================================");
-					System.out.println("Getting Started with Amazon S3");
-					System.out.println("===========================================\n");
+					AmazonKinesisFirehose firehoseClient =  AmazonKinesisFirehoseClientBuilder.standard().withRegion("us-east-1").build();
 
 					long time = System.currentTimeMillis();
 					String timeStamp = Long.toString(time);
-					try {
-						ObjectMetadata objectMetadata = new ObjectMetadata();
-						objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
-						PutObjectRequest putRequest = new PutObjectRequest(bucketName, keyName+timeStamp+".json", createSampleFile(record.value()));
-						putRequest.setMetadata(objectMetadata);
+
+					if (destination.equals("firehose")) {
+						System.out.println("===========================================");
+						System.out.println("Getting Started with Amazon Firehose");
+						System.out.println("===========================================\n");
+						try {
+							// IMPORTANT!!!
+							// Append "\n" to separate individual messages in a blob!!!
+
+							String deliveryStreamName = firehose;
+
+							String msg = record.value() + "\n";
+
+							ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
+
+							PutRecordRequest putRecordRequest = new PutRecordRequest()
+									.withDeliveryStreamName(deliveryStreamName);
+							Record entry = new Record().withData(data);
+							putRecordRequest.setRecord(entry);
+							PutRecordResult result = firehoseClient.putRecord(putRecordRequest);
+							log.info(result.toString());
+						} catch (AmazonClientException ex) {
+							log.error(ex.toString());
+						}
+					} else if (destination.equals("s3")) {
 
 
 
+						System.out.println("===========================================");
+						System.out.println("Getting Started with Amazon S3");
+						System.out.println("===========================================\n");
 
-            /*
-             * Upload an object to your bucket - You can easily upload a file to
-             * S3, or upload directly an InputStream if you know the length of
-             * the data in the stream. You can also specify your own metadata
-             * when uploading to S3, which allows you set a variety of options
-             * like content-type and content-encoding, plus additional metadata
-             * specific to your applications.
-             */
-						System.out.println("Uploading a new object to S3 from a file\n");
-						s3.putObject(putRequest);
+						try {
+							ObjectMetadata objectMetadata = new ObjectMetadata();
+							objectMetadata.setSSEAlgorithm(ObjectMetadata.AES_256_SERVER_SIDE_ENCRYPTION);
+							PutObjectRequest putRequest = new PutObjectRequest(bucketName, keyName + timeStamp + ".json", createSampleFile(record.value()));
+							putRequest.setMetadata(objectMetadata);
 
-					} catch (AmazonServiceException ase) {
-						System.out.println("Caught an AmazonServiceException, which means your request made it "
-								+ "to Amazon S3, but was rejected with an error response for some reason.");
-						System.out.println("Error Message:    " + ase.getMessage());
-						System.out.println("HTTP Status Code: " + ase.getStatusCode());
-						System.out.println("AWS Error Code:   " + ase.getErrorCode());
-						System.out.println("Error Type:       " + ase.getErrorType());
-						System.out.println("Request ID:       " + ase.getRequestId());
-					} catch (AmazonClientException ace) {
-						System.out.println("Caught an AmazonClientException, which means the client encountered "
-								+ "a serious internal problem while trying to communicate with S3, "
-								+ "such as not being able to access the network.");
-						System.out.println("Error Message: " + ace.getMessage());
+						/*
+						 * Upload an object to your bucket - You can easily upload a file to
+						 * S3, or upload directly an InputStream if you know the length of
+						 * the data in the stream. You can also specify your own metadata
+						 * when uploading to S3, which allows you set a variety of options
+						 * like content-type and content-encoding, plus additional metadata
+						 * specific to your applications.
+						 */
+							System.out.println("Uploading a new object to S3 from a file\n");
+							s3.putObject(putRequest);
+
+
+						} catch (AmazonServiceException ase) {
+							System.out.println("Caught an AmazonServiceException, which means your request made it "
+									+ "to Amazon S3, but was rejected with an error response for some reason.");
+							System.out.println("Error Message:    " + ase.getMessage());
+							System.out.println("HTTP Status Code: " + ase.getStatusCode());
+							System.out.println("AWS Error Code:   " + ase.getErrorCode());
+							System.out.println("Error Type:       " + ase.getErrorType());
+							System.out.println("Request ID:       " + ase.getRequestId());
+						} catch (AmazonClientException ace) {
+							System.out.println("Caught an AmazonClientException, which means the client encountered "
+									+ "a serious internal problem while trying to communicate with S3, "
+									+ "such as not being able to access the network.");
+							System.out.println("Error Message: " + ace.getMessage());
+						}
 					}
 				}
-//				}
 			}
 		
 		}
 	}
 
+	public static ByteBuffer convertStringToByteBuffer(String msg, Charset charset){
+		return ByteBuffer.wrap(msg.getBytes(charset));
+	}
 	private static File createSampleFile(String json) throws IOException {
 		File file = File.createTempFile("aws-java-sdk-", ".json");
 		file.deleteOnExit();
@@ -202,5 +248,6 @@ public class ConsumerExample {
 
 		return file;
 	}
+
 
 }

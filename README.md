@@ -22,17 +22,19 @@ To run the jar, be sure to include the topic at the end and group id at the end.
 java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar     
 
 usage: Consumer Example
- -s,--s3-bucket                Bucket Name
- -k,--key                      Storage Key
  -b,--bootstrap-server <arg>   Endpoint ('ip:port')
+ -d,--destination <arg>        Destination (s3 or firehose)
+ -f,--firehose <arg>           firehose (optional)
  -g,--group <arg>              Consumer Group
+ -k,--key_name <arg>           Key Name (optional)
+ -s,--s3-bucket <arg>          Bucket Name (optional)
  -t,--topic <arg>              Topic Name
  -type,--type <arg>            string|byte message type
 ```
-Example Usage As Of: 7/05/17
+Example Usage As Of: 1/10/18
 
 ``` 
-java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server localhost:9092 -g group1 -t j2735BsmRawJson -type string -s myBucketName -k myFileKey
+▶ java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server 192.168.1.8:9092 -g group1 -t topic.OdeTimJson -type string -d firehose
 ```
 
 It should return the following confirmation
