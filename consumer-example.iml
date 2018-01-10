@@ -18,10 +18,15 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: usdot.jpo.ode:jpo-ode-core:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: usdot.jpo.ode:jpo-ode-common:0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20140107" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.7" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.8.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.8.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.8.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.8.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.8.3" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.woodstox:stax2-api:3.1.4" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.woodstox:woodstox-core:5.0.2" level="project" />
     <orderEntry type="library" name="Maven: javax.websocket:javax.websocket-client-api:1.1" level="project" />
     <orderEntry type="library" name="Maven: com.esotericsoftware:kryo:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.esotericsoftware:reflectasm:1.11.3" level="project" />
@@ -31,13 +36,12 @@
     <orderEntry type="library" name="Maven: usdot.jpo.ode:jpo-ode-plugins:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: us.dot.its.jpo.ode:j2735:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: asn_1:oss_toed:6.3" level="project" />
+    <orderEntry type="library" name="Maven: us.dot.its.jpo.ode:ieee1609dot2:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: gov.usdot:fedgov-cv-security-2016:1.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.56" level="project" />
-    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.6" level="project" />
-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
-    <orderEntry type="library" name="Maven: us.dot.its.jpo.ode:ieee1609dot2:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.9" level="project" />
     <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-core:3.1.2" level="project" />
     <orderEntry type="library" name="Maven: io.dropwizard.metrics:metrics-graphite:3.1.2" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-core:1.19.1" level="project" />
@@ -55,6 +59,7 @@
     <orderEntry type="library" name="Maven: org.apache.kafka:connect-json:0.10.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.kafka:connect-api:0.10.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.rocksdb:rocksdbjni:4.9.0" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:1.4.1.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:1.4.1.RELEASE" level="project" />

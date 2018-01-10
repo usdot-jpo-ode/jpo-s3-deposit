@@ -45,7 +45,7 @@ public class FirehoseWriter {
 				// IMPORTANT!!!
 				// Append "\n" to separate individual messages in a blob!!!
 			   File f = new File(dirName, file.getName());
-		      String res = new String(Files.readAllBytes(Paths.get(f.getPath())));
+		      	String res = new String(Files.readAllBytes(Paths.get(f.getPath())));
 		      
 				String msg = res + "\n";
 				
