@@ -47,13 +47,13 @@ public class ConsumerExample {
 		bucket_name_option.setRequired(false);
 		options.addOption(bucket_name_option);
 		
-		Option key_name_option = new Option("k", "key_name", true, "Key Name");
+		Option key_name_option = new Option("k", "key-name", true, "Key Name");
 		key_name_option.setRequired(false);
 		options.addOption(key_name_option);
 		
-		Option firehose_option = new Option("f", "firehose", true, "firehose");
-		firehose_option.setRequired(false);
-		options.addOption(firehose_option);
+//		Option firehose_option = new Option("f", "firehose", true, "firehose");
+//		firehose_option.setRequired(false);
+//		options.addOption(firehose_option);
 		
 		Option bootstrap_server = new Option("b", "bootstrap-server", true, "Endpoint ('ip:port')");
 		bootstrap_server.setRequired(true);
@@ -94,10 +94,10 @@ public class ConsumerExample {
 
 		//S3 properties
 		String bucketName = cmd.getOptionValue("s3-bucket");
-		String keyName = cmd.getOptionValue("firehose");
+		String keyName = cmd.getOptionValue("key-name");
 
 		//Kinesis properties
-		String firehose = cmd.getOptionValue("firehose");
+		//String firehose = cmd.getOptionValue("firehose");
 		
 		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
 		System.out.printf("DEBUG - Key name: %s\n", keyName);
@@ -173,14 +173,12 @@ public class ConsumerExample {
 							// IMPORTANT!!!
 							// Append "\n" to separate individual messages in a blob!!!
 
-							String deliveryStreamName = firehose;
-
 							String msg = record.value() + "\n";
 
 							ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
 
 							PutRecordRequest putRecordRequest = new PutRecordRequest()
-									.withDeliveryStreamName(deliveryStreamName);
+									.withDeliveryStreamName(bucketName);
 							Record entry = new Record().withData(data);
 							putRecordRequest.setRecord(entry);
 							PutRecordResult result = firehoseClient.putRecord(putRecordRequest);
