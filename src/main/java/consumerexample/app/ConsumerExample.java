@@ -39,21 +39,17 @@ public class ConsumerExample {
 		// Option parsing
 		Options options = new Options();
 		
-		Option destination_option = new Option("d", "destination", true, "Destination (s3 or firehose)");
-		destination_option.setRequired(true);
+		Option destination_option = new Option("d", "destination", true, "Optional, destination defaults to Firehose. Enter \"s3\" to override");
+		destination_option.setRequired(false);
 		options.addOption(destination_option);
 		
-		Option bucket_name_option = new Option("s", "s3-bucket", true, "Bucket Name");
-		bucket_name_option.setRequired(false);
+		Option bucket_name_option = new Option("s", "bucket-name", true, "Bucket Name");
+		bucket_name_option.setRequired(true);
 		options.addOption(bucket_name_option);
 		
-		Option key_name_option = new Option("k", "key_name", true, "Key Name");
-		key_name_option.setRequired(false);
+		Option key_name_option = new Option("k", "key-name", true, "Key Name");
+		key_name_option.setRequired(true);
 		options.addOption(key_name_option);
-		
-		Option firehose_option = new Option("f", "firehose", true, "firehose");
-		firehose_option.setRequired(false);
-		options.addOption(firehose_option);
 		
 		Option bootstrap_server = new Option("b", "bootstrap-server", true, "Endpoint ('ip:port')");
 		bootstrap_server.setRequired(true);
@@ -89,15 +85,11 @@ public class ConsumerExample {
 		String topic = cmd.getOptionValue("topic");
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
-		
 		String destination = cmd.getOptionValue("destination");
 
 		//S3 properties
-		String bucketName = cmd.getOptionValue("s3-bucket");
-		String keyName = cmd.getOptionValue("firehose");
-
-		//Kinesis properties
-		String firehose = cmd.getOptionValue("firehose");
+		String bucketName = cmd.getOptionValue("bucket-name");
+		String keyName = cmd.getOptionValue("key-name");
 		
 		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
 		System.out.printf("DEBUG - Key name: %s\n", keyName);
@@ -165,33 +157,7 @@ public class ConsumerExample {
 					long time = System.currentTimeMillis();
 					String timeStamp = Long.toString(time);
 
-					if (destination.equals("firehose")) {
-						System.out.println("===========================================");
-						System.out.println("Getting Started with Amazon Firehose");
-						System.out.println("===========================================\n");
-						try {
-							// IMPORTANT!!!
-							// Append "\n" to separate individual messages in a blob!!!
-
-							String deliveryStreamName = firehose;
-
-							String msg = record.value() + "\n";
-
-							ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
-
-							PutRecordRequest putRecordRequest = new PutRecordRequest()
-									.withDeliveryStreamName(deliveryStreamName);
-							Record entry = new Record().withData(data);
-							putRecordRequest.setRecord(entry);
-							PutRecordResult result = firehoseClient.putRecord(putRecordRequest);
-							log.info(result.toString());
-						} catch (AmazonClientException ex) {
-							log.error(ex.toString());
-						}
-					} else if (destination.equals("s3")) {
-
-
-
+					 if (destination.equals("s3")) {
 						System.out.println("===========================================");
 						System.out.println("Getting Started with Amazon S3");
 						System.out.println("===========================================\n");
@@ -228,7 +194,29 @@ public class ConsumerExample {
 									+ "such as not being able to access the network.");
 							System.out.println("Error Message: " + ace.getMessage());
 						}
-					}
+					} else {
+                  // Default is to deposit to Kinesis/Firehose, override via .env variables if S3 deposit desired
+                  System.out.println("===========================================");
+                  System.out.println("Getting Started with Amazon Firehose");
+                  System.out.println("===========================================\n");
+                  try {
+                     // IMPORTANT!!!
+                     // Append "\n" to separate individual messages in a blob!!!
+
+                     String msg = record.value() + "\n";
+
+                     ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
+
+                     PutRecordRequest putRecordRequest = new PutRecordRequest()
+                           .withDeliveryStreamName(bucketName);
+                     Record entry = new Record().withData(data);
+                     putRecordRequest.setRecord(entry);
+                     PutRecordResult result = firehoseClient.putRecord(putRecordRequest);
+                     log.info(result.toString());
+                  } catch (AmazonClientException ex) {
+                     log.error(ex.toString());
+                  }
+               }
 				}
 			}
 		
