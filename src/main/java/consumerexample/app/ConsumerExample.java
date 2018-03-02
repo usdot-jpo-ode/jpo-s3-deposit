@@ -1,5 +1,27 @@
 package consumerexample.app;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.log4j.Logger;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
@@ -15,21 +37,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import org.apache.commons.cli.*;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.log4j.Logger;
+
 import us.dot.its.jpo.ode.plugin.j2735.J2735Bsm;
 import us.dot.its.jpo.ode.util.SerializationUtils;
-
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Properties;
 public class ConsumerExample {
 	private static final Logger log = Logger.getLogger(ConsumerRecord.class);
 
@@ -41,6 +51,7 @@ public class ConsumerExample {
 		
 		Option destination_option = new Option("d", "destination", true, "Optional, destination defaults to Firehose. Enter \"s3\" to override");
 		destination_option.setRequired(false);
+		destination_option.setOptionalArg(true);
 		options.addOption(destination_option);
 		
 		Option bucket_name_option = new Option("s", "bucket-name", true, "Bucket Name");
@@ -86,7 +97,7 @@ public class ConsumerExample {
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
 		String destination = cmd.getOptionValue("destination");
-
+		
 		//S3 properties
 		String bucketName = cmd.getOptionValue("bucket-name");
 		String keyName = cmd.getOptionValue("key-name");
@@ -94,6 +105,8 @@ public class ConsumerExample {
 		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
 		System.out.printf("DEBUG - Key name: %s\n", keyName);
 		System.out.printf("DEBUG - Kafka topic: %s\n", topic);
+		System.out.printf("DEBUG - Type: %s\n", type);
+		System.out.printf("DEBUG - Destination: %s\n", destination);
 
 
 		// Properties for the kafka topic
@@ -157,7 +170,7 @@ public class ConsumerExample {
 					long time = System.currentTimeMillis();
 					String timeStamp = Long.toString(time);
 
-					 if (destination.equals("s3")) {
+					 if (destination != null && destination.equals("s3")) {
 						System.out.println("===========================================");
 						System.out.println("Getting Started with Amazon S3");
 						System.out.println("===========================================\n");
