@@ -1,9 +1,9 @@
-# S3 Deposit Service
+# AWS Deposit Service
 
-This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined bucket. With the ODE is up and running, this project will run alongside as a seperate service.
+This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined Firehose/Kinesis or S3 bucket. This runs alongside the ODE and when deployed using Docker Compose, runs in a Docker container.
 
 ## Quick Run
-The use of AWS S3 credentials is being read from the machine's environmental variables. Be sure to set them appropriately in your bash profile.
+The use of AWS credentials is being read from the machine's environmental variables. You may also set them in your bash profile. Note that when using Docker Compose from the main `jpo-ode` repository, these variables are set in the `.env` present in that repo.
 
 ```
 export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY>
@@ -19,32 +19,34 @@ mvn clean compile assembly:single install
 To run the jar, be sure to include the topic at the end and group id at the end. If this is not a distributed system, the group can be any string.
 
 ```
-java -jar target/consumer-example-1.0-SNAPSHOT-jar-with-dependencies.jar     
+java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar   
 
 usage: Consumer Example
- -b,--bootstrap-server <arg>   Endpoint ('ip:port')
- -d,--destination <arg>        Destination (s3 or firehose)
- -f,--firehose <arg>           firehose (optional)
+ -s,--bootstrap-server <arg>   Endpoint ('ip:port')
+ -d,--destination <arg>        Destination (Optional, defaults to Kinesis/Firehose, put "s3" to override) 
  -g,--group <arg>              Consumer Group
- -k,--key_name <arg>           Key Name (optional)
- -s,--s3-bucket <arg>          Bucket Name (optional)
+ -k,--key_name <arg>           Key Name
+ -b,--bucket-name <arg>        Bucket Name
  -t,--topic <arg>              Topic Name
  -type,--type <arg>            string|byte message type
 ```
-Example Usage As Of: 1/10/18
+Example Usage As Of: 3/2/18
 
 ``` 
-▶ java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server 192.168.1.8:9092 -g group1 -t topic.OdeTimJson -type string -d firehose
+
+▶ java -jar target/consumer-example-0.0.1-SNAPSHOT-jar-with-dependencies.jar --bootstrap-server 192.168.1.1:9092 -g group1 -t topic.OdeTimJson -b test-bucket-name -k "bsm/ingest/bsm-" -type string
 ```
 
 It should return the following confirmation
 
 ```
-DEBUG - Bucket name: myBucketName
-DEBUG - Key name: myFileKey 
-DEBUG - Kafka topic: j2735BsmRawJson
+DEBUG - Bucket name: test-usdot-its-cvpilot-wydot-bsm
+DEBUG - Key name: bsm/ingest/wydot-bsm-
+DEBUG - Kafka topic: topic.OdeBsmJson
+DEBUG - Type: string
+DEBUG - Destination: null
 
-Subscribed to topic j2735BsmRawJson 
+Subscribed to topic OdeTimJson 
 ```
 Triggering an upload into the ODE, the output should be seen decoded into JSON in the console.
 
