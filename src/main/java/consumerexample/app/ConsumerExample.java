@@ -54,7 +54,7 @@ public class ConsumerExample {
 		destination_option.setOptionalArg(true);
 		options.addOption(destination_option);
 		
-		Option bucket_name_option = new Option("s", "bucket-name", true, "Bucket Name");
+		Option bucket_name_option = new Option("b", "bucket-name", true, "Bucket Name");
 		bucket_name_option.setRequired(true);
 		options.addOption(bucket_name_option);
 		
@@ -62,7 +62,7 @@ public class ConsumerExample {
 		key_name_option.setRequired(true);
 		options.addOption(key_name_option);
 		
-		Option bootstrap_server = new Option("b", "bootstrap-server", true, "Endpoint ('ip:port')");
+		Option bootstrap_server = new Option("s", "bootstrap-server", true, "Endpoint ('ip:port')");
 		bootstrap_server.setRequired(true);
 		options.addOption(bootstrap_server);
 
