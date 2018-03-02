@@ -97,7 +97,7 @@ public class ConsumerExample {
 		String group = cmd.getOptionValue("group");
 		String type = cmd.getOptionValue("type");
 		String destination = cmd.getOptionValue("destination");
-
+		
 		//S3 properties
 		String bucketName = cmd.getOptionValue("bucket-name");
 		String keyName = cmd.getOptionValue("key-name");
@@ -105,6 +105,8 @@ public class ConsumerExample {
 		System.out.printf("DEBUG - Bucket name: %s\n", bucketName);
 		System.out.printf("DEBUG - Key name: %s\n", keyName);
 		System.out.printf("DEBUG - Kafka topic: %s\n", topic);
+		System.out.printf("DEBUG - Type: %s\n", type);
+		System.out.printf("DEBUG - Destination: %s\n", destination);
 
 
 		// Properties for the kafka topic
@@ -168,7 +170,7 @@ public class ConsumerExample {
 					long time = System.currentTimeMillis();
 					String timeStamp = Long.toString(time);
 
-					 if (destination.equals("s3")) {
+					 if (destination != null && destination.equals("s3")) {
 						System.out.println("===========================================");
 						System.out.println("Getting Started with Amazon S3");
 						System.out.println("===========================================\n");
