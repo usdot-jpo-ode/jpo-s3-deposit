@@ -2,11 +2,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.consumerexample</groupId>
+  <groupId>usdot.jpo.ode</groupId>
+  <artifactId>jpo-aws-depositor</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <artifactId>consumer-example</artifactId>
   <packaging>jar</packaging>
-  <name>consumer-example</name>
+  <name>JPO AWS Depositor</name>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -19,11 +19,6 @@
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
       <version>0.10.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>usdot.jpo.ode</groupId>
-      <artifactId>jpo-ode-core</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
     <dependency>
@@ -44,6 +39,11 @@
       <version>1.11.288</version>
     </dependency>
 
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.3</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -55,7 +55,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>consumerexample.app.ConsumerExample</mainClass>
+              <mainClass>us.dot.its.jpo.ode.aws.depositor.AwsDepositor</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
