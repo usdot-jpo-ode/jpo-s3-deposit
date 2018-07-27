@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -30,6 +31,8 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehose;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsync;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsyncClientBuilder;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseClientBuilder;
 import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
 import com.amazonaws.services.kinesisfirehose.model.PutRecordResult;
@@ -84,7 +87,7 @@ public class AwsDepositor {
 
       boolean depositToS3 = false;
       AmazonS3 s3 = null;
-      AmazonKinesisFirehose firehose = null;
+      AmazonKinesisFirehoseAsync firehose = null;
       if (destination != null && destination.equals("s3")) {
          depositToS3 = true;
          s3 = createS3Client(awsRegion);
@@ -134,7 +137,7 @@ public class AwsDepositor {
       }
    }
 
-   private static void depositToFirehose(AmazonKinesisFirehose firehose, ConsumerRecord<String, String> record) {
+   private static void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record) {
       try {
          // IMPORTANT!!!
          // Append "\n" to separate individual messages in a blob!!!
@@ -148,8 +151,11 @@ public class AwsDepositor {
          putRecordRequest.setRecord(entry);
          logger.debug("Uploading a new record to Firehose: " + record.value());
          
-         PutRecordResult result = firehose.putRecord(putRecordRequest);
-         logger.debug(result.toString());
+         // TODO: use result to get response.
+         // Future<PutRecordResult> result = 
+         firehose.putRecordAsync(putRecordRequest);
+         
+         // logger.debug(result.toString());
       } catch (AmazonClientException ex) {
          logger.error(ex.toString());
          throw ex;
@@ -247,14 +253,14 @@ public class AwsDepositor {
       return cmd;
    }
 
-   private static AmazonKinesisFirehose buildFirehoseClient(String awsRegion) {
+   private static AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
       // Default is to deposit to Kinesis/Firehose, override via .env
       // variables if S3 deposit desired
       logger.debug("=============================");
       logger.debug("Connecting to Amazon Firehose");
       logger.debug("=============================");
       
-      return AmazonKinesisFirehoseClientBuilder.standard().withRegion(awsRegion).build();
+      return AmazonKinesisFirehoseAsyncClientBuilder.standard().withRegion(awsRegion).build();
    }
 
    private static AmazonS3 createS3Client(String awsRegion) {
