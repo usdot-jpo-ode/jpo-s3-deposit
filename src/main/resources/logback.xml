@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true">
+	<jmxConfigurator />
+
+	<appender name="DEFAULT" class="ch.qos.logback.core.FileAppender">
+		<file>jpo-aws-epositor.log</file>
+		<append>true</append>
+		<encoder>
+			<!-- <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern> -->
+			<pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS", UTC} [%thread] %-5level %logger{0} - %msg %n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{"yyyy-MM-dd HH:mm:ss.SSS", UTC} [%thread] %-5level %logger{0} - %msg %n</pattern>
+		</encoder>
+	</appender>
+	
+	<logger name="us.dot.its.jpo.ode" level="INFO" />
+	<root level="WARN">
+		<appender-ref ref="DEFAULT" />
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
