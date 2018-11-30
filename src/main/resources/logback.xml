@@ -17,7 +17,7 @@
 		</encoder>
 	</appender>
 	
-	<logger name="us.dot.its.jpo.ode" level="INFO" />
+	<logger name="us.dot.its.jpo.ode" level="DEBUG" />
 	<root level="WARN">
 		<appender-ref ref="DEFAULT" />
 		<appender-ref ref="STDOUT" />
