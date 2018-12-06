@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,12 +28,15 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsync;
 import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsyncClientBuilder;
 import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
+import com.amazonaws.services.kinesisfirehose.model.PutRecordResult;
 import com.amazonaws.services.kinesisfirehose.model.Record;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -50,6 +55,7 @@ public class AwsDepositor {
    private static String bucketName;
    private static String awsRegion;
    private static String keyName;
+   private static boolean waitOpt;
 
    public static void main(String[] args) throws Exception {
 
@@ -59,6 +65,7 @@ public class AwsDepositor {
       topic = cmd.getOptionValue("topic");
       group = cmd.getOptionValue("group");
       destination = cmd.getOptionValue("destination", "firehose");
+      waitOpt = cmd.hasOption("w");
 
       // S3 properties
       bucketName = cmd.getOptionValue("bucket-name");
@@ -70,6 +77,7 @@ public class AwsDepositor {
       logger.debug("Key name: {}", keyName);
       logger.debug("Kafka topic: {}", topic);
       logger.debug("Destination: {}", destination);
+      logger.debug("Wait: {}", waitOpt);
 
       // Properties for the kafka topic
       Properties props = new Properties();
@@ -133,7 +141,7 @@ public class AwsDepositor {
       }
    }
 
-   private static void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record) {
+   private static void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record) throws InterruptedException, ExecutionException {
       try {
          // IMPORTANT!!!
          // Append "\n" to separate individual messages in a blob!!!
@@ -142,16 +150,23 @@ public class AwsDepositor {
       
          ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
       
-         PutRecordRequest putRecordRequest = new PutRecordRequest().withDeliveryStreamName(bucketName);
+         AWSCredentialsProvider credentialsProvider = new SystemPropertiesCredentialsProvider();
+         PutRecordRequest putRecordRequest = new PutRecordRequest();
+         putRecordRequest.withDeliveryStreamName(bucketName);
+         putRecordRequest.setRequestCredentialsProvider(credentialsProvider);
+         
          Record entry = new Record().withData(data);
          putRecordRequest.setRecord(entry);
          logger.debug("Uploading a new record to Firehose: " + record.value());
          
-         // TODO: use result to get response.
          // Future<PutRecordResult> result = 
-         firehose.putRecordAsync(putRecordRequest);
+         Future<PutRecordResult> prFuture = firehose.putRecordAsync(putRecordRequest);
          
-         // logger.debug(result.toString());
+         // TODO: use result to get response in a separate thread.
+         if (waitOpt) {
+           PutRecordResult prResult = prFuture.get();
+           logger.info(prResult.toString());
+         }
       } catch (AmazonClientException ex) {
          logger.error(ex.toString());
          throw ex;
@@ -233,6 +248,10 @@ public class AwsDepositor {
       Option group_option = new Option("g", "group", true, "Consumer Group");
       group_option.setRequired(true);
       options.addOption(group_option);
+
+      Option wait_option = new Option("w", "wait", false, "Wait for AWS deposit results");
+      wait_option.setRequired(false);
+      options.addOption(wait_option);
 
       CommandLineParser parser = new DefaultParser();
       HelpFormatter formatter = new HelpFormatter();
