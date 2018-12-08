@@ -15,7 +15,7 @@ COPY --from=builder /home/target/jpo-aws-depositor-0.0.1-SNAPSHOT-jar-with-depen
 CMD java -Dlogback.configurationFile=/home/logback.xml \
 	-Daws.accessKeyId=$AWS_ACCESS_KEY_ID -Daws.secretKey=$AWS_SECRET_ACCESS_KEY \
 	-jar /home/jpo-aws-depositor-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
-	--bootstrap-server 192.168.1.12:9092 \
+	--bootstrap-server $DOCKER_HOST_IP:9092 \
 	-g group1 \
 	-t $DEPOSIT_TOPIC \
 	-b $DEPOSIT_BUCKET_NAME \
