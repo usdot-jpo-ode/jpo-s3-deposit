@@ -4,7 +4,7 @@
 
   <groupId>usdot.jpo.ode</groupId>
   <artifactId>jpo-aws-depositor</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
   <name>JPO AWS Depositor</name>
   <dependencies>
@@ -46,6 +46,7 @@
     </dependency>
   </dependencies>
   <build>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <!-- Build an executable JAR -->
