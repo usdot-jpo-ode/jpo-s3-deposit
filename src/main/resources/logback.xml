@@ -3,7 +3,7 @@
 	<jmxConfigurator />
 
 	<appender name="DEFAULT" class="ch.qos.logback.core.FileAppender">
-		<file>jpo-aws-epositor.log</file>
+		<file>jpo-aws-depositor.log</file>
 		<append>true</append>
 		<encoder>
 			<!-- <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern> -->
