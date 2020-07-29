@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2018 572682
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
 package us.dot.its.jpo.ode.aws.depositor;
 
 import java.io.File;
@@ -7,6 +22,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -19,9 +36,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +70,14 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 
 public class AwsDepositor {
    private static Logger logger = LoggerFactory.getLogger(AwsDepositor.class);
-   private static final long CONSUMER_POLL_TIMEOUT_MS = 60000;
+   private static final long CONSUMER_POLL_TIMEOUT_MS = 60000;   
+   private static final String K_AWS_ACCESS_KEY_ID = "AccessKeyId";
+   private static final String K_AWS_SECRET_ACCESS_SECRET = "SecretAccessKey";
+   private static final String K_AWS_SESSION_TOKEN = "SessionToken";
+   private static final String K_AWS_EXPIRATION = "Expiration";
+   private static final String API_ENDPOINT = "https://dev-proxy-portal.securedatacommons.com/Dev-DOT-WYDOTFirehoseUsers/dev-generate_token_private";
+   private static final String HEADER_Accept = "application/json";
+   private static final String HEADER_X_API_KEY = "TkOemUAWlBa5VfHXgRN7x8OnG0ACZUa611aOOAv9";
 
    private static String endpoint;
    private static String topic;
@@ -56,6 +87,11 @@ public class AwsDepositor {
    private static String awsRegion;
    private static String keyName;
    private static boolean waitOpt;
+
+   private static String AWS_ACCESS_KEY_ID;
+   private static String AWS_SECRET_ACCESS_KEY;
+   private static String AWS_SESSION_TOKEN;
+   private static String AWS_EXPIRATION;
 
    public static void main(String[] args) throws Exception {
 
@@ -78,6 +114,13 @@ public class AwsDepositor {
       logger.debug("Kafka topic: {}", topic);
       logger.debug("Destination: {}", destination);
       logger.debug("Wait: {}", waitOpt);
+
+      JSONObject profile = generateAWSProfile();
+      keyName = "bsm/ingest/wydot-bsm-";
+      AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
+      AWS_SECRET_ACCESS_KEY = profile.get(K_AWS_SECRET_ACCESS_SECRET).toString();
+      AWS_SESSION_TOKEN = profile.get(K_AWS_SESSION_TOKEN).toString();
+      AWS_EXPIRATION = profile.get(K_AWS_EXPIRATION).toString().split("\\+")[0];
 
       // Properties for the kafka topic
       Properties props = new Properties();
@@ -149,6 +192,29 @@ public class AwsDepositor {
          String msg = record.value() + "\n";
       
          ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
+
+         // Check the expiration time for the profile credentials
+         LocalDateTime current_datetime = LocalDateTime.now();
+         LocalDateTime expiration_datetime = LocalDateTime.parse(AWS_EXPIRATION,
+               DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+         System.out.println();
+         if (expiration_datetime.isBefore(current_datetime)) {
+            // If credential is expired, generate aws credentials
+            JSONObject profile = generateAWSProfile();
+            AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
+            AWS_SECRET_ACCESS_KEY = profile.get(K_AWS_SECRET_ACCESS_SECRET).toString();
+            AWS_SESSION_TOKEN = profile.get(K_AWS_SESSION_TOKEN).toString();
+            AWS_EXPIRATION = profile.get(K_AWS_EXPIRATION).toString().split("\\+")[0];
+         }
+
+         System.setProperty("aws.accessKeyId", AWS_ACCESS_KEY_ID);
+         System.setProperty("aws.secretKey", AWS_SECRET_ACCESS_KEY);
+         System.setProperty("aws.sessionToken", AWS_SESSION_TOKEN);
+         logger.debug("aws.secretKey: {}", AWS_ACCESS_KEY_ID);
+         logger.debug("aws.secretKey: {}", AWS_SECRET_ACCESS_KEY);
+         logger.debug("aws.secretKey: {}", AWS_SESSION_TOKEN);
+         logger.debug("aws.expiration: {}", AWS_EXPIRATION);
+         logger.debug("bucketName: {}", bucketName);
       
          AWSCredentialsProvider credentialsProvider = new SystemPropertiesCredentialsProvider();
          PutRecordRequest putRecordRequest = new PutRecordRequest();
@@ -312,6 +378,28 @@ public class AwsDepositor {
       writer.close();
 
       return file;
+   }
+
+   private static JSONObject generateAWSProfile() {
+      CloseableHttpClient client = HttpClients.createDefault();
+      HttpPost httpPost = new HttpPost(API_ENDPOINT);
+      JSONObject jsonResult = new JSONObject();
+      String json = "{}";
+      StringEntity entity;
+      try {
+         entity = new StringEntity(json);
+         httpPost.setEntity(entity);
+         httpPost.addHeader("Accept", HEADER_Accept);
+         httpPost.addHeader("x-api-key", HEADER_X_API_KEY);
+
+         CloseableHttpResponse response = client.execute(httpPost);
+         String result = EntityUtils.toString(response.getEntity());
+         jsonResult = new JSONObject(result);
+         client.close();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return jsonResult;
    }
 
 }
