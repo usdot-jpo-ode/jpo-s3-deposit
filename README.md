@@ -8,6 +8,13 @@ The use of AWS credentials is being read from the machine's environmental variab
 ```
 export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY> 
 export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_KEY>
+K_AWS_ACCESS_KEY_ID = AccessKeyId
+K_AWS_SECRET_ACCESS_SECRET = SecretAccessKey
+K_AWS_SESSION_TOKEN = SessionToken
+K_AWS_EXPIRATION = Expiration
+API_ENDPOINT = <API_ENDPOINT>
+HEADER_ACCEPT = application/json
+HEADER_X_API_KEY = <HEADER_X_API_KEY>
 ```
 
 The project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.
