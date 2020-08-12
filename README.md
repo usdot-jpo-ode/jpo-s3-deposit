@@ -6,8 +6,13 @@ This project is intended to serve as a  consumer application to subscribe to a K
 The use of AWS credentials is being read from the machine's environmental variables. You may also set them in your bash profile. Note that when using Docker Compose from the main `jpo-ode` repository, these variables are set in the `.env` present in that repo.
 
 ```
-export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY> 
-export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_KEY>
+export K_AWS_ACCESS_KEY_ID = AccessKeyId
+export K_AWS_SECRET_ACCESS_SECRET = SecretAccessKey
+export K_AWS_SESSION_TOKEN = SessionToken
+export K_AWS_EXPIRATION = Expiration
+export API_ENDPOINT = <API_ENDPOINT>
+export HEADER_ACCEPT = application/json
+export HEADER_X_API_KEY = <HEADER_X_API_KEY>
 ```
 
 The project needs to be compiled with assembly to ensure that that resulting jar is runnable with the Kafka libraries. It will produce a jar under `target/` with a "with-dependencies" tag.

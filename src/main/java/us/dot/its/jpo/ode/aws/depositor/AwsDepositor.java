@@ -246,7 +246,8 @@ public class AwsDepositor {
 			Future<PutRecordResult> prFuture = firehose.putRecordAsync(putRecordRequest);
 
 			// TODO: use result to get response in a separate thread.
-			if (waitOpt) {  
+
+			if (waitOpt) {
 				PutRecordResult prResult = prFuture.get();
 				logger.info(prResult.toString());
 			}
