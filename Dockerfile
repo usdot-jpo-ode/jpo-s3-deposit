@@ -23,6 +23,6 @@ CMD java -Dlogback.configurationFile=/home/logback.xml \
 	-a $K_AWS_SECRET_ACCESS_SECRET \
 	-n $K_AWS_SESSION_TOKEN \
 	-e $K_AWS_EXPIRATION \
-	-u $API_ENDPOINT
-	-h $HEADER_ACCEPT 
+	-u $API_ENDPOINT \
+	-h $HEADER_ACCEPT \
 	-x $HEADER_X_API_KEY
