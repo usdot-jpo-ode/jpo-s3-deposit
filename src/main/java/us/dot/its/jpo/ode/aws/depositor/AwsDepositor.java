@@ -113,7 +113,7 @@ public class AwsDepositor {
 		K_AWS_SECRET_ACCESS_KEY = cmd.getOptionValue("k-aws-secret-key", "SecretAccessKey");
 		K_AWS_SESSION_TOKEN = cmd.getOptionValue("k-aws-session-token", "SessionToken");
 		K_AWS_EXPIRATION = cmd.getOptionValue("k-aws-expiration", "Expiration");
-		API_ENDPOINT = cmd.getOptionValue("token-endpoint");
+		API_ENDPOINT = cmd.getOptionValue("token-endpoint","");
 		HEADER_Accept = cmd.getOptionValue("header-accept", "application/json");
 		HEADER_X_API_KEY = cmd.getOptionValue("header-x-api-key");
 
@@ -131,11 +131,14 @@ public class AwsDepositor {
 		logger.debug("HEADER_Accept: {}", HEADER_Accept);
 		logger.debug("HEADER_X_API_KEY: {}", HEADER_X_API_KEY);
 
-		JSONObject profile = generateAWSProfile();
-		AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
-		AWS_SECRET_ACCESS_KEY = profile.get(K_AWS_SECRET_ACCESS_KEY).toString();
-		AWS_SESSION_TOKEN = profile.get(K_AWS_SESSION_TOKEN).toString();
-		AWS_EXPIRATION = profile.get(K_AWS_EXPIRATION).toString().split("\\+")[0];
+		if(API_ENDPOINT.length() > 0){
+			JSONObject profile = generateAWSProfile();
+			AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
+			AWS_SECRET_ACCESS_KEY = profile.get(K_AWS_SECRET_ACCESS_KEY).toString();
+			AWS_SESSION_TOKEN = profile.get(K_AWS_SESSION_TOKEN).toString();
+			AWS_EXPIRATION = profile.get(K_AWS_EXPIRATION).toString().split("\\+")[0];
+		}
+		
 
 		// Properties for the kafka topic
 		Properties props = new Properties();
@@ -215,7 +218,7 @@ public class AwsDepositor {
 			LocalDateTime expiration_datetime = LocalDateTime.parse(AWS_EXPIRATION,
 					DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 			System.out.println();
-			if (expiration_datetime.isBefore(current_datetime)) {
+			if (expiration_datetime.isBefore(current_datetime) && API_ENDPOINT.length() > 0) {
 				// If credential is expired, generate aws credentials
 				JSONObject profile = generateAWSProfile();
 				AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
@@ -351,16 +354,16 @@ public class AwsDepositor {
 		aws_expiration_option.setRequired(false);
 		options.addOption(aws_expiration_option);
 
-		Option token_endpoint_option = new Option("u", "token-endpoint", true, "API token endpoint");
-		token_endpoint_option.setRequired(true);
+		Option token_endpoint_option = new Option("u", "token-endpoint", false, "API token endpoint");
+		token_endpoint_option.setRequired(false);
 		options.addOption(token_endpoint_option);
 
 		Option header_accept_option = new Option("h", "header-accept", false, "Header Accept");
 		header_accept_option.setRequired(false);
 		options.addOption(header_accept_option);
 
-		Option header_x_key_option = new Option("x", "header-x-api-key", true, "Header X API key");
-		header_x_key_option.setRequired(true);
+		Option header_x_key_option = new Option("x", "header-x-api-key", false, "Header X API key");
+		header_x_key_option.setRequired(false);
 		options.addOption(header_x_key_option);
 
 		CommandLineParser parser = new DefaultParser();
