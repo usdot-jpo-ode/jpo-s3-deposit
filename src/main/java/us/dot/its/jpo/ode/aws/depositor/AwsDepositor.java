@@ -29,6 +29,25 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsync;
+import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsyncClientBuilder;
+import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
+import com.amazonaws.services.kinesisfirehose.model.PutRecordResult;
+import com.amazonaws.services.kinesisfirehose.model.Record;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -48,25 +67,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsync;
-import com.amazonaws.services.kinesisfirehose.AmazonKinesisFirehoseAsyncClientBuilder;
-import com.amazonaws.services.kinesisfirehose.model.PutRecordRequest;
-import com.amazonaws.services.kinesisfirehose.model.PutRecordResult;
-import com.amazonaws.services.kinesisfirehose.model.Record;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
 
 public class AwsDepositor {
 	private static Logger logger = LoggerFactory.getLogger(AwsDepositor.class);
@@ -354,15 +354,15 @@ public class AwsDepositor {
 		aws_expiration_option.setRequired(false);
 		options.addOption(aws_expiration_option);
 
-		Option token_endpoint_option = new Option("u", "token-endpoint", false, "API token endpoint");
+		Option token_endpoint_option = new Option("u", "token-endpoint", true, "API token endpoint");
 		token_endpoint_option.setRequired(false);
 		options.addOption(token_endpoint_option);
 
-		Option header_accept_option = new Option("h", "header-accept", false, "Header Accept");
+		Option header_accept_option = new Option("h", "header-accept", true, "Header Accept");
 		header_accept_option.setRequired(false);
 		options.addOption(header_accept_option);
 
-		Option header_x_key_option = new Option("x", "header-x-api-key", false, "Header X API key");
+		Option header_x_key_option = new Option("x", "header-x-api-key", true, "Header X API key");
 		header_x_key_option.setRequired(false);
 		options.addOption(header_x_key_option);
 

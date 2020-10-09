@@ -7,6 +7,10 @@
   <version>1.0.0</version>
   <packaging>jar</packaging>
   <name>JPO AWS Depositor</name>
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -78,4 +82,3 @@
     </plugins>
   </build>
 </project>
-
