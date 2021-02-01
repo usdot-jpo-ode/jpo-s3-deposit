@@ -113,7 +113,7 @@ public class AwsDepositor {
 		K_AWS_SECRET_ACCESS_KEY = cmd.getOptionValue("k-aws-secret-key", "SecretAccessKey");
 		K_AWS_SESSION_TOKEN = cmd.getOptionValue("k-aws-session-token", "SessionToken");
 		K_AWS_EXPIRATION = cmd.getOptionValue("k-aws-expiration", "Expiration");
-		API_ENDPOINT = cmd.getOptionValue("token-endpoint","");
+		API_ENDPOINT = cmd.getOptionValue("token-endpoint", "");
 		HEADER_Accept = cmd.getOptionValue("header-accept", "application/json");
 		HEADER_X_API_KEY = cmd.getOptionValue("header-x-api-key");
 
@@ -131,14 +131,13 @@ public class AwsDepositor {
 		logger.debug("HEADER_Accept: {}", HEADER_Accept);
 		logger.debug("HEADER_X_API_KEY: {}", HEADER_X_API_KEY);
 
-		if(API_ENDPOINT.length() > 0){
+		if (API_ENDPOINT.length() > 0) {
 			JSONObject profile = generateAWSProfile();
 			AWS_ACCESS_KEY_ID = profile.get(K_AWS_ACCESS_KEY_ID).toString();
 			AWS_SECRET_ACCESS_KEY = profile.get(K_AWS_SECRET_ACCESS_KEY).toString();
 			AWS_SESSION_TOKEN = profile.get(K_AWS_SESSION_TOKEN).toString();
 			AWS_EXPIRATION = profile.get(K_AWS_EXPIRATION).toString().split("\\+")[0];
 		}
-		
 
 		// Properties for the kafka topic
 		Properties props = new Properties();
@@ -204,7 +203,7 @@ public class AwsDepositor {
 	}
 
 	private static void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
-			throws InterruptedException, ExecutionException {
+			throws InterruptedException, ExecutionException, IOException {
 		try {
 			// IMPORTANT!!!
 			// Append "\n" to separate individual messages in a blob!!!
@@ -427,24 +426,29 @@ public class AwsDepositor {
 		return file;
 	}
 
-	private static JSONObject generateAWSProfile() {
+	private static JSONObject generateAWSProfile() throws IOException {
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(API_ENDPOINT);
 		JSONObject jsonResult = new JSONObject();
 		String json = "{}";
 		StringEntity entity;
+		CloseableHttpResponse response = null;
 		try {
 			entity = new StringEntity(json);
 			httpPost.setEntity(entity);
 			httpPost.addHeader("Accept", HEADER_Accept);
 			httpPost.addHeader("x-api-key", HEADER_X_API_KEY);
 
-			CloseableHttpResponse response = client.execute(httpPost);
+			response = client.execute(httpPost);
 			String result = EntityUtils.toString(response.getEntity());
 			jsonResult = new JSONObject(result);
-			client.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			if (response != null) {
+				response.close();
+			}
+			client.close();
 		}
 		return jsonResult;
 	}
