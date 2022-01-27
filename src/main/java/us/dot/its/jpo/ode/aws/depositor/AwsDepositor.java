@@ -146,12 +146,20 @@ public class AwsDepositor {
 		// Properties for the kafka topic
 		Properties props = new Properties();
 		props.put("bootstrap.servers", endpoint);
+
+		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
+		String kafkaType = System.getenv("KAFKA_TYPE");
+		if (kafkaType != null && kafkaType.equals("CONFLUENT")) {
+			addConfluentProperties(props);
+		}
+
 		props.put("group.id", group);
 		props.put("enable.auto.commit", "false");
 		props.put("auto.commit.interval.ms", "1000");
 		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
 
 		boolean depositToS3 = false;
 		AmazonS3 s3 = null;
@@ -204,6 +212,27 @@ public class AwsDepositor {
 				stringConsumer.close();
 			}
 		}
+	}
+
+	private Properties addConfluentProperties(Properties props) {
+		props.put("ssl.endpoint.identification.algorithm", "https");
+		props.put("security.protocol", "SASL_SSL");
+		props.put("sasl.mechanism", "PLAIN");
+
+		String username = System.getenv("CONFLUENT_KEY");
+		String password = System.getenv("CONFLUENT_SECRET");
+
+		if (username != null && password != null) {
+			String auth = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+					"username=\"" + username + "\" " +
+					"password=\"" + password + "\";";
+			props.put("sasl.jaas.config", auth);
+		}
+		else {
+			logger.error("Environment variables CONFLUENT_KEY and CONFLUENT_SECRET are not set. Set these in the .env file to use Confluent Cloud");
+		}
+
+		return props;
 	}
 
 	private void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
