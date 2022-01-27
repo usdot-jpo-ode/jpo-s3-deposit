@@ -207,7 +207,7 @@ public class AwsDepositor {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Sever Error. reconnecting to AWS ", e);
+				logger.error("Server Error. reconnecting to AWS ", e);
 			} finally {
 				stringConsumer.close();
 			}
