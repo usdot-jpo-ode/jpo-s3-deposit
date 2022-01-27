@@ -214,7 +214,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private Properties addConfluentProperties(Properties props) {
+	private void addConfluentProperties(Properties props) {
 		props.put("ssl.endpoint.identification.algorithm", "https");
 		props.put("security.protocol", "SASL_SSL");
 		props.put("sasl.mechanism", "PLAIN");
@@ -232,7 +232,6 @@ public class AwsDepositor {
 			logger.error("Environment variables CONFLUENT_KEY and CONFLUENT_SECRET are not set. Set these in the .env file to use Confluent Cloud");
 		}
 
-		return props;
 	}
 
 	private void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
