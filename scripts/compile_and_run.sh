@@ -6,7 +6,7 @@ mvn clean package assembly:single
 echo "Finished compiling."
 
 # run
-@echo "Executing."
+echo "Executing."
 java -Dlogback.configurationFile=./src/main/resources/logback.xml \
 	-jar ./target/jpo-aws-depositor-with-dependencies.jar \
 	--bootstrap-server $DOCKER_HOST_IP:9092 \
