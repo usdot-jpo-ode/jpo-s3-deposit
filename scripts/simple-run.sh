@@ -1,1 +1,1 @@
-java -jar ./target/jpo-aws-depositor-jar-with-dependencies.jar -b ${BUCKET_NAME} -k ${DEPOSIT_KEY_NAME} -s ${DOCKER_HOST_IP}:9092 -t ${DEPOSIT_TOPIC} -g ${DEPOSIT_GROUP}
+java -jar ./target/jpo-aws-depositor-jar-with-dependencies.jar -b ${DEPOSIT_BUCKET_NAME} -k ${DEPOSIT_KEY_NAME} -s ${DOCKER_HOST_IP}:9092 -t ${DEPOSIT_TOPIC} -g ${DEPOSIT_GROUP}
