@@ -1,0 +1,25 @@
+version: '2'
+services:
+  ppmbsm:
+    build:
+      context: .
+      dockerfile: Dockerfile.cdot
+    environment:
+      CVPEP_BSM_BUCKET_NAME: ${CVPEP_BSM_BUCKET_NAME}
+      CVPEP_BSM_DEPOSIT_KEY: wydot-bsm-
+      CVPEP_BSM_TOPIC: topic.OdeBsmJson
+      CVPEP_BSM_K_AWS_ACCESS_KEY_ID: ${ACCESS_KEY}
+      CVPEP_BSM_K_AWS_SECRET_ACCESS_SECRET: ${ACCESS_SECRET}
+      CVPEP_BSM_K_AWS_SESSION_TOKEN: SessionToken
+      CVPEP_BSM_K_AWS_EXPIRATION: Expiration
+      CVPEP_BSM_API_ENDPOINT: ${CVPEP_BSM_API_ENDPOINT}
+      CVPEP_BSM_HEADER_ACCEPT: application/json
+      CVPEP_BSM_HEADER_X_API_KEY: 
+      CVPEP_BSM_GROUP: group_cvpep_bsm
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      KAFKA_TYPE: ${KAFKA_TYPE}
+      CONFLUENT_KEY: ${CONFLUENT_KEY}
+      CONFLUENT_SECRET: ${CONFLUENT_SECRET}
+
+    depends_on:
+      - kafka
