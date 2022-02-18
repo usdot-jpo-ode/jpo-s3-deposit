@@ -5,20 +5,19 @@ services:
       context: .
       dockerfile: Dockerfile.cdot
     environment:
-      DEPOSIT_TOPIC: topic.OdeBsmJson
-      K_AWS_SESSION_TOKEN: SessionToken
-      K_AWS_EXPIRATION: Expiration
-      HEADER_ACCEPT: application/json
-      DEPOSIT_GROUP: testgroup
+      API_ENDPOINT: ${API_ENDPOINT}
+      DEPOSIT_TOPIC: ${DEPOSIT_TOPIC}
+      DEPOSIT_GROUP: ${DEPOSIT_GROUP}
       DEPOSIT_BUCKET_NAME: ${DEPOSIT_BUCKET_NAME}
       DEPOSIT_KEY_NAME: ${DEPOSIT_KEY_NAME}
+      K_AWS_SESSION_TOKEN: ${K_AWS_SESSION_TOKEN}
+      K_AWS_EXPIRATION: ${K_AWS_EXPIRATION}
       K_AWS_ACCESS_KEY_ID: ${K_AWS_ACCESS_KEY_ID}
-      API_ENDPOINT: ${API_ENDPOINT}
+      HEADER_ACCEPT: ${HEADER_ACCEPT}
       HEADER_X_API_KEY: ${HEADER_X_API_KEY}
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       KAFKA_TYPE: ${KAFKA_TYPE}
       CONFLUENT_KEY: ${CONFLUENT_KEY}
       CONFLUENT_SECRET: ${CONFLUENT_SECRET}
-
     depends_on:
       - kafka
