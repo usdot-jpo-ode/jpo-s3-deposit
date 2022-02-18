@@ -8,7 +8,7 @@ services:
       CVPEP_BSM_DEPOSIT_KEY: wydot-bsm-
       CVPEP_BSM_TOPIC: topic.OdeBsmJson
       K_AWS_SESSION_TOKEN: SessionToken
-      K_AWS_EXPIRATIONN: Expiration
+      K_AWS_EXPIRATION: Expiration
       HEADER_ACCEPT: application/json
       DEPOSIT_GROUP: group_cvpep_bsm
       DEPOSIT_BUCKET_NAME: ${DEPOSIT_BUCKET_NAME}
