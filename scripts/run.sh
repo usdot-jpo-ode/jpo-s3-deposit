@@ -1,7 +1,7 @@
 # note: must be run from the project root folder
 
 # run
-@echo "Executing."
+echo "Executing."
 java -Dlogback.configurationFile=./src/main/resources/logback.xml \
 	-jar ./target/jpo-aws-depositor-with-dependencies.jar \
 	--bootstrap-server $DOCKER_HOST_IP:9092 \
@@ -16,4 +16,4 @@ java -Dlogback.configurationFile=./src/main/resources/logback.xml \
 	-u $API_ENDPOINT \
 	-h $HEADER_ACCEPT \
 	-x $HEADER_X_API_KEY
-@echo "Finished executing."
+echo "Finished executing."
