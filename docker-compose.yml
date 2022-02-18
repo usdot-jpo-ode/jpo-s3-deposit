@@ -1,6 +1,6 @@
 version: '2'
 services:
-  ppmbsm:
+  s3d:
     build:
       context: .
       dockerfile: Dockerfile.cdot
@@ -9,7 +9,7 @@ services:
       K_AWS_SESSION_TOKEN: SessionToken
       K_AWS_EXPIRATION: Expiration
       HEADER_ACCEPT: application/json
-      DEPOSIT_GROUP: group1
+      DEPOSIT_GROUP: testgroup
       DEPOSIT_BUCKET_NAME: ${DEPOSIT_BUCKET_NAME}
       DEPOSIT_KEY_NAME: ${DEPOSIT_KEY_NAME}
       K_AWS_ACCESS_KEY_ID: ${K_AWS_ACCESS_KEY_ID}
