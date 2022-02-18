@@ -5,12 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile.cdot
     environment:
-      CVPEP_BSM_DEPOSIT_KEY: wydot-bsm-
-      CVPEP_BSM_TOPIC: topic.OdeBsmJson
+      DEPOSIT_TOPIC: topic.OdeBsmJson
       K_AWS_SESSION_TOKEN: SessionToken
       K_AWS_EXPIRATION: Expiration
       HEADER_ACCEPT: application/json
-      DEPOSIT_GROUP: group_cvpep_bsm
+      DEPOSIT_GROUP: group1
       DEPOSIT_BUCKET_NAME: ${DEPOSIT_BUCKET_NAME}
       DEPOSIT_KEY_NAME: ${DEPOSIT_ACCESS_KEY}
       K_AWS_ACCESS_KEY_ID: ${K_AWS_ACCESS_KEY_ID}
