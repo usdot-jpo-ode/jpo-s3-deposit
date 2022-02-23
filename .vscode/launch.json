@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch AwsDepositor w/ Confluent Cloud",
+            "request": "launch",
+            "mainClass": "us.dot.its.jpo.ode.aws.depositor.AwsDepositor",
+            "projectName": "jpo-aws-depositor",
+            "args": ["--bootstrap-server", "<bootstrap-server>:9092",
+                     "-g", "<group>",
+                     "-t", "<topic>",
+                     "-b", "<bucket-name>",
+                     "-k", "<key>",
+                     "-d", "s3"],
+            "env": {
+                "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+                "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}",
+                "DOCKER_HOST_IP": "<docker-host-ip>",
+                "KAFKA_TYPE": "CONFLUENT",
+                "CONFLUENT_KEY": "<confluent-key>",
+                "CONFLUENT_SECRET": "<confluent-secret>"
+            }
+        }
+    ]
+}
