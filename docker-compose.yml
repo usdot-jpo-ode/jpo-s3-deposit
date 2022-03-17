@@ -19,7 +19,7 @@ services:
   s3d:
     build:
       context: .
-      dockerfile: Dockerfile.cdot
+      dockerfile: Dockerfile
     environment:
       DOCKER_HOST_IP: ${DOCKER_HOST_IP}
       API_ENDPOINT: ${API_ENDPOINT}
