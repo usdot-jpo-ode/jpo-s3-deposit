@@ -110,7 +110,7 @@ public class AwsDepositor {
 
 		// S3 properties
 		bucketName = cmd.getOptionValue("bucket-name");
-		awsRegion = cmd.getOptionValue("region", "us-east-1");
+		awsRegion = cmd.getOptionValue("region", "us-east-2");
 		keyName = cmd.getOptionValue("key-name");
 
 		K_AWS_ACCESS_KEY_ID = cmd.getOptionValue("k-aws-key", "AccessKeyId");
@@ -214,25 +214,21 @@ public class AwsDepositor {
 		}
 	}
 
-	private void addConfluentProperties(Properties props) {
+	private static void addConfluentProperties(Properties props) {
 		props.put("ssl.endpoint.identification.algorithm", "https");
 		props.put("security.protocol", "SASL_SSL");
 		props.put("sasl.mechanism", "PLAIN");
-
-		String username = System.getenv("CONFLUENT_KEY");
-		String password = System.getenv("CONFLUENT_SECRET");
-
+  
+		String username = getEnvironmentVariable("CONFLUENT_KEY");
+		String password = getEnvironmentVariable("CONFLUENT_SECRET");
+  
 		if (username != null && password != null) {
-			String auth = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
-					"username=\"" + username + "\" " +
-					"password=\"" + password + "\";";
-			props.put("sasl.jaas.config", auth);
+		   String auth = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+				   "username=\"" + username + "\" " +
+				   "password=\"" + password + "\";";
+		   props.put("sasl.jaas.config", auth);
 		}
-		else {
-			logger.error("Environment variables CONFLUENT_KEY and CONFLUENT_SECRET are not set. Set these in the .env file to use Confluent Cloud");
-		}
-
-	}
+	 }
 
 	private void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
 			throws InterruptedException, ExecutionException {
@@ -479,5 +475,13 @@ public class AwsDepositor {
 		}
 		return jsonResult;
 	}
+
+	private static String getEnvironmentVariable(String variableName) {
+		String value = System.getenv(variableName);
+		if (value == null || value.equals("")) {
+		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
+		}
+		return value;
+	 }
 
 }
