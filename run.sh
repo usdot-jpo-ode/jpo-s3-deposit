@@ -1,5 +1,9 @@
 # note: must be run from the project root folder
 
+# build
+echo "Compiling."
+mvn clean package assembly:single
+
 # run
 echo "Executing."
 java -Dlogback.configurationFile=./src/main/resources/logback.xml \
@@ -16,4 +20,3 @@ java -Dlogback.configurationFile=./src/main/resources/logback.xml \
 	-u $API_ENDPOINT \
 	-h $HEADER_ACCEPT \
 	-x $HEADER_X_API_KEY
-echo "Finished executing."
