@@ -110,7 +110,7 @@ public class AwsDepositor {
 
 		// S3 properties
 		bucketName = cmd.getOptionValue("bucket-name");
-		awsRegion = cmd.getOptionValue("region", "us-east-2");
+		awsRegion = cmd.getOptionValue("region", "us-east-1");
 		keyName = cmd.getOptionValue("key-name");
 
 		K_AWS_ACCESS_KEY_ID = cmd.getOptionValue("k-aws-key", "AccessKeyId");
