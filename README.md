@@ -114,9 +114,18 @@ There is a provided docker-compose file (docker-compose-confluent-cloud.yml) tha
 This has only been tested with Confluent Cloud but technically all SASL authenticated Kafka brokers can be reached using this method.
 
 # Run Script
-- The run.sh script can be utilized to run the PPM manually.
-- It should be noted that this script must be run from the project root folder, or it will not work.
+The run.sh script can be utilized to run the PPM manually.
+
+It should be noted that this script must be run from the project root folder, or it will not work.
 
 # Docker Compose Files
-- The docker-compose.yml file can be used to spin up the PPM as a container, along with instances of kafka and zookeeper.
-- The docker-compose-confluent-cloud.yml file can be used to spin up the PPM as a container by itself. This depends on an instance of kafka hosted by Confluent Cloud.
+The docker-compose.yml file can be used to spin up the PPM as a container, along with instances of kafka and zookeeper.
+
+The docker-compose-confluent-cloud.yml file can be used to spin up the PPM as a container by itself. This depends on an instance of kafka hosted by Confluent Cloud.
+
+# Launch Configurations
+A launch.json file with some launch configurations have been included to allow developers to debug the project in VSCode.
+
+The values between braces < > are stand-in and need to be replaced by the developer. 
+
+To run the project through the launch configuration and start debugging, the developer can navigate to the Run panel (View->Run or Ctrl+Shift+D), select the configuration at the top, and click the green arrow or press F5 to begin.
