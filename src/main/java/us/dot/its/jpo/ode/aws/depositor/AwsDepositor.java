@@ -69,33 +69,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AwsDepositor {
-	private static Logger logger = LoggerFactory.getLogger(AwsDepositor.class);
-	private static final long CONSUMER_POLL_TIMEOUT_MS = 60000;
+	private final Logger logger = LoggerFactory.getLogger(AwsDepositor.class);
+	private final long CONSUMER_POLL_TIMEOUT_MS = 60000;
 
-	private static String endpoint;
-	private static String topic;
-	private static String group;
-	private static String destination;
-	private static String bucketName;
-	private static String awsRegion;
-	private static String keyName;
-	private static boolean waitOpt;
+	private String endpoint;
+	private String topic;
+	private String group;
+	private String destination;
+	private String bucketName;
+	private String awsRegion;
+	private String keyName;
+	private boolean waitOpt;
 
-	private static String K_AWS_ACCESS_KEY_ID;
-	private static String K_AWS_SECRET_ACCESS_KEY;
-	private static String K_AWS_SESSION_TOKEN;
-	private static String K_AWS_EXPIRATION;
-	private static String API_ENDPOINT;
-	private static String HEADER_Accept;
-	private static String HEADER_X_API_KEY;
+	private String K_AWS_ACCESS_KEY_ID;
+	private String K_AWS_SECRET_ACCESS_KEY;
+	private String K_AWS_SESSION_TOKEN;
+	private String K_AWS_EXPIRATION;
+	private String API_ENDPOINT;
+	private String HEADER_Accept;
+	private String HEADER_X_API_KEY;
 
-	private static String AWS_ACCESS_KEY_ID;
-	private static String AWS_SECRET_ACCESS_KEY;
-	private static String AWS_SESSION_TOKEN;
-	private static String AWS_EXPIRATION;
+	private String AWS_ACCESS_KEY_ID;
+	private String AWS_SECRET_ACCESS_KEY;
+	private String AWS_SESSION_TOKEN;
+	private String AWS_EXPIRATION;
 
 	public static void main(String[] args) throws Exception {
+		AwsDepositor awsDepositor = new AwsDepositor();
+		awsDepositor.run(args);
+	}
 
+	public void run(String[] args) throws Exception {
 		CommandLine cmd = commandLineOptions(args);
 
 		endpoint = cmd.getOptionValue("bootstrap-server");
@@ -142,12 +146,20 @@ public class AwsDepositor {
 		// Properties for the kafka topic
 		Properties props = new Properties();
 		props.put("bootstrap.servers", endpoint);
+
+		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
+		String kafkaType = System.getenv("KAFKA_TYPE");
+		if (kafkaType != null && kafkaType.equals("CONFLUENT")) {
+			addConfluentProperties(props);
+		}
+
 		props.put("group.id", group);
 		props.put("enable.auto.commit", "false");
 		props.put("auto.commit.interval.ms", "1000");
 		props.put("session.timeout.ms", "30000");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
 
 		boolean depositToS3 = false;
 		AmazonS3 s3 = null;
@@ -195,14 +207,30 @@ public class AwsDepositor {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Sever Error. reconnecting to AWS ", e);
+				logger.error("Server Error. reconnecting to AWS ", e);
 			} finally {
 				stringConsumer.close();
 			}
 		}
 	}
 
-	private static void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
+	private static void addConfluentProperties(Properties props) {
+		props.put("ssl.endpoint.identification.algorithm", "https");
+		props.put("security.protocol", "SASL_SSL");
+		props.put("sasl.mechanism", "PLAIN");
+  
+		String username = getEnvironmentVariable("CONFLUENT_KEY");
+		String password = getEnvironmentVariable("CONFLUENT_SECRET");
+  
+		if (username != null && password != null) {
+		   String auth = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+				   "username=\"" + username + "\" " +
+				   "password=\"" + password + "\";";
+		   props.put("sasl.jaas.config", auth);
+		}
+	 }
+
+	private void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
 			throws InterruptedException, ExecutionException, IOException {
 		try {
 			// IMPORTANT!!!
@@ -259,7 +287,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private static void depositToS3(AmazonS3 s3, ConsumerRecord<String, String> record) throws IOException {
+	private void depositToS3(AmazonS3 s3, ConsumerRecord<String, String> record) throws IOException {
 		try {
 			long time = System.currentTimeMillis();
 			String timeStamp = Long.toString(time);
@@ -298,7 +326,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private static CommandLine commandLineOptions(String[] args) throws ParseException {
+	private CommandLine commandLineOptions(String[] args) throws ParseException {
 		// Option parsing
 		Options options = new Options();
 
@@ -380,7 +408,7 @@ public class AwsDepositor {
 		return cmd;
 	}
 
-	private static AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
+	private AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
 		// Default is to deposit to Kinesis/Firehose, override via .env
 		// variables if S3 deposit desired
 		logger.debug("=============================");
@@ -390,7 +418,7 @@ public class AwsDepositor {
 		return AmazonKinesisFirehoseAsyncClientBuilder.standard().withRegion(awsRegion).build();
 	}
 
-	private static AmazonS3 createS3Client(String awsRegion) {
+	private AmazonS3 createS3Client(String awsRegion) {
 		logger.debug("============== ========");
 		logger.debug("Connecting to Amazon S3");
 		logger.debug("=======================");
@@ -411,11 +439,11 @@ public class AwsDepositor {
 		return s3;
 	}
 
-	public static ByteBuffer convertStringToByteBuffer(String msg, Charset charset) {
+	public ByteBuffer convertStringToByteBuffer(String msg, Charset charset) {
 		return ByteBuffer.wrap(msg.getBytes(charset));
 	}
 
-	private static File createSampleFile(String json) throws IOException {
+	private File createSampleFile(String json) throws IOException {
 		File file = File.createTempFile("aws-java-sdk-", ".json");
 		file.deleteOnExit();
 
@@ -426,7 +454,7 @@ public class AwsDepositor {
 		return file;
 	}
 
-	private static JSONObject generateAWSProfile() throws IOException {
+	private JSONObject generateAWSProfile() throws IOException {
 		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(API_ENDPOINT);
 		JSONObject jsonResult = new JSONObject();
@@ -452,5 +480,13 @@ public class AwsDepositor {
 		}
 		return jsonResult;
 	}
+
+	private static String getEnvironmentVariable(String variableName) {
+		String value = System.getenv(variableName);
+		if (value == null || value.equals("")) {
+		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
+		}
+		return value;
+	 }
 
 }
