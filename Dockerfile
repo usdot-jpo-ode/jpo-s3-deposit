@@ -7,7 +7,7 @@ COPY ./src ./src
 
 RUN mvn clean package assembly:single
 
-FROM openjdk:8u171-jre-alpine
+FROM eclipse-temurin:11-jre-alpine
 
 COPY --from=builder /home/src/main/resources/logback.xml /home
 COPY --from=builder /home/target/jpo-aws-depositor-jar-with-dependencies.jar /home
