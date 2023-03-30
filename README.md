@@ -109,6 +109,8 @@ Rather than using a local kafka instance, this project can utilize an instance o
 
 ## CC Docker Compose File
 There is a provided docker-compose file (docker-compose-confluent-cloud.yml) that passes the above environment variables into the container that gets created. Further, this file doesn't spin up a local kafka instance since it is not required.
+## Release Notes
+The current version and release history of the Jpo-s3-deposit: [Jpo-s3-deposit Release Notes](<docs/Release_notes.md>)
 
 ## Note
 This has only been tested with Confluent Cloud but technically all SASL authenticated Kafka brokers can be reached using this method.
