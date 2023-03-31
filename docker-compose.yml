@@ -1,0 +1,39 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: ${DOCKER_HOST_IP}
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "test:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  s3d:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DOCKER_HOST_IP: ${DOCKER_HOST_IP}
+      API_ENDPOINT: ${API_ENDPOINT}
+      DEPOSIT_TOPIC: ${DEPOSIT_TOPIC}
+      DEPOSIT_GROUP: ${DEPOSIT_GROUP}
+      DEPOSIT_BUCKET_NAME: ${DEPOSIT_BUCKET_NAME}
+      DEPOSIT_KEY_NAME: ${DEPOSIT_KEY_NAME}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      AWS_EXPIRATION: ${AWS_EXPIRATION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      HEADER_ACCEPT: ${HEADER_ACCEPT}
+      HEADER_X_API_KEY: ${HEADER_X_API_KEY}
+    depends_on:
+      - kafka
+
+      

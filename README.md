@@ -91,3 +91,43 @@ kafka-console-consumer --zookeeper 192.168.1.151:2181 --topic topic.J2735Bsm
 ```
 kafka-console-producer --broker-list 192.168.1.151:9092 --topic topic.J2735Bsm 
 ```
+
+# Confluent Cloud Integration
+Rather than using a local kafka instance, this project can utilize an instance of kafka hosted by Confluent Cloud via SASL.
+
+## Environment variables
+### Purpose & Usage
+- The DOCKER_HOST_IP environment variable is used to communicate with the bootstrap server that the instance of Kafka is running on.
+- The KAFKA_TYPE environment variable specifies what type of kafka connection will be attempted and is used to check if Confluent should be utilized.
+- The CONFLUENT_KEY and CONFLUENT_SECRET environment variables are used to authenticate with the bootstrap server.
+
+### Values
+- DOCKER_HOST_IP must be set to the bootstrap server address (excluding the port)
+- KAFKA_TYPE must be set to "CONFLUENT"
+- CONFLUENT_KEY must be set to the API key being utilized for CC
+- CONFLUENT_SECRET must be set to the API secret being utilized for CC
+
+## CC Docker Compose File
+There is a provided docker-compose file (docker-compose-confluent-cloud.yml) that passes the above environment variables into the container that gets created. Further, this file doesn't spin up a local kafka instance since it is not required.
+## Release Notes
+The current version and release history of the Jpo-s3-deposit: [Jpo-s3-deposit Release Notes](<docs/Release_notes.md>)
+
+## Note
+This has only been tested with Confluent Cloud but technically all SASL authenticated Kafka brokers can be reached using this method.
+
+# Run Script
+The run.sh script can be utilized to run the PPM manually.
+
+It should be noted that this script must be run from the project root folder, or it will not work.
+
+# Docker Compose Files
+The docker-compose.yml file can be used to spin up the PPM as a container, along with instances of kafka and zookeeper.
+
+The docker-compose-confluent-cloud.yml file can be used to spin up the PPM as a container by itself. This depends on an instance of kafka hosted by Confluent Cloud.
+
+# Launch Configurations
+A launch.json file with some launch configurations have been included to allow developers to debug the project in VSCode.
+
+The values between braces < > are stand-in and need to be replaced by the developer. 
+
+To run the project through the launch configuration and start debugging, the developer can navigate to the Run panel (View->Run or Ctrl+Shift+D), select the configuration at the top, and click the green arrow or press F5 to begin.
