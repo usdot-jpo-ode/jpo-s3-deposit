@@ -8,7 +8,7 @@ on:
       - "release/*"
 
 jobs:
-  dockerhub-jpo-ode:
+  dockerhub-jpo-s3-deposit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
