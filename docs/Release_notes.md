@@ -1,6 +1,19 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.2.0, released July 5th 2023
+----------------------------------------
+
+### **Summary**
+The updates for jpo-s3-deposit 1.2.0 include CI/CD and dependency changes.
+
+Enhancements in this release:
+- The JSON version being used has been bumped to 20230227.
+- CI/CD has been added.
+
+Known Issues
+- The `run.sh` script incorrectly references the built JAR and does not work at this time. The dockerfile correctly references the built JAR, however, so this is non-critical.
+  
 Version 1.1.0, released Mar 30th 2023
 ----------------------------------------
 
