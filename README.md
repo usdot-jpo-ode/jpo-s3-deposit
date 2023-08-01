@@ -131,3 +131,30 @@ A launch.json file with some launch configurations have been included to allow d
 The values between braces < > are stand-in and need to be replaced by the developer. 
 
 To run the project through the launch configuration and start debugging, the developer can navigate to the Run panel (View->Run or Ctrl+Shift+D), select the configuration at the top, and click the green arrow or press F5 to begin.
+
+# MongoDB Deposit Service
+
+The mongo-connector service connects to specified Kafka topics (as defined in the mongo-connector/connect_start.sh script) and deposits these messages to separate collections in the MongoDB Database. The codebase that provides this functionality comes from Confluent using their community licensed [cp-kafka-connect image](https://hub.docker.com/r/confluentinc/cp-kafka-connect). Documentation for this image can be found [here](https://docs.confluent.io/platform/current/connect/index.html#what-is-kafka-connect).
+
+## Configuration
+Provided in the mongo-connector directory is a sample configuration shell script that is used to create kafka sinks to MongoDB. For testing please create a copy of this file and rename it to `connect_start.sh`. To configure more sinks to be created, use the format to declare a topic configuration as shown in lines 6-9 and then run the topic sink creation function as shown in lines 74 & 75. The topic configuration can be specified to transform timestamp fields that are in the top level of the message as well as passing in kafka keys into the mongo _id field.
+## Quick Run
+
+1. Create a copy of `sample.env` and rename it to `.env`.
+2. Update the variable `DOCKER_HOST_IP` to the local IP address of the system running docker.
+   1. If connecting to a separately deployed mongo cluster make sure to specify the `MONGO_IP` and `MONGO_PORT`.
+3. Create a copy of `sample_connect_start.sh` in the `mongo-connector` directory and rename it to `connect_start.sh`
+4. Navigate back to the root directory and run the following command: `docker compose -f docker-compose-mongo.yml up -d`
+5. Using either a local kafka install or [kcat](https://github.com/edenhill/kcat) to produce a sample message to one of the sink topics.
+6. Create a file named `message.json` with the following contents:
+```
+            {
+                "key": "put_your_key_here",
+                "value":{
+                    "hello":"mongo"
+                }
+            }
+```
+7. Run the following command to produce that message to the testing topic: `kafkacat -P -b localhost:9092 -t testing -l -K: -T -J < message.json`
+8. Using [MongoDB Compass](https://www.mongodb.com/products/compass) or another DB visualizer connect to the MongoDB database using this connection string: `mongodb://localhost:27017`
+9. Now we are done! If everything is working properly you should see an ODE database with a testing collection that has a document with the contents of the value field from `message.json`.

@@ -10,3 +10,6 @@ consumer-example.iml
 /.settings/*
 /bin
 /*.log
+
+.env
+connect_start.sh
