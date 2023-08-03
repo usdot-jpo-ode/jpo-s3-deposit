@@ -133,11 +133,11 @@ The values between braces < > are stand-in and need to be replaced by the develo
 To run the project through the launch configuration and start debugging, the developer can navigate to the Run panel (View->Run or Ctrl+Shift+D), select the configuration at the top, and click the green arrow or press F5 to begin.
 
 # MongoDB Deposit Service
-
 The mongo-connector service connects to specified Kafka topics (as defined in the mongo-connector/connect_start.sh script) and deposits these messages to separate collections in the MongoDB Database. The codebase that provides this functionality comes from Confluent using their community licensed [cp-kafka-connect image](https://hub.docker.com/r/confluentinc/cp-kafka-connect). Documentation for this image can be found [here](https://docs.confluent.io/platform/current/connect/index.html#what-is-kafka-connect).
 
 ## Configuration
 Provided in the mongo-connector directory is a sample configuration shell script that is used to create kafka sinks to MongoDB. For testing please create a copy of this file and rename it to `connect_start.sh`. To configure more sinks to be created, use the format to declare a topic configuration as shown in lines 6-9 and then run the topic sink creation function as shown in lines 74 & 75. The topic configuration can be specified to transform timestamp fields that are in the top level of the message as well as passing in kafka keys into the mongo _id field.
+
 ## Quick Run
 
 1. Create a copy of `sample.env` and rename it to `.env`.
