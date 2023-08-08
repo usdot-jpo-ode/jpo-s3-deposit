@@ -3,7 +3,29 @@ echo "------------------------------------------"
 echo "Kafka connector creation started."
 echo "------------------------------------------"
 
-declare -A testing=([name]="testing" [collection]="testing"
+declare -A OdeRawEncodedBSMJson=([name]="topic.OdeRawEncodedBSMJson" [collection]="OdeRawEncodedBSMJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+declare -A OdeBsmJson=([name]="topic.OdeBsmJson" [collection]="OdeBsmJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+
+declare -A OdeRawEncodedMAPJson=([name]="topic.OdeRawEncodedMAPJson" [collection]="OdeRawEncodedMAPJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+declare -A OdeMapJson=([name]="topic.OdeMapJson" [collection]="OdeMapJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+
+declare -A OdeRawEncodedSPATJson=([name]="topic.OdeRawEncodedSPATJson" [collection]="OdeRawEncodedSPATJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+declare -A OdeSpatJson=([name]="topic.OdeSpatJson" [collection]="OdeSpatJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+
+declare -A OdeRawEncodedTIMJson=([name]="topic.OdeRawEncodedTIMJson" [collection]="OdeRawEncodedTIMJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+declare -A OdeTimJson=([name]="topic.OdeTimJson" [collection]="OdeTimJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+
+declare -A OdeRawEncodedPsmJson=([name]="topic.OdeRawEncodedPsmJson" [collection]="OdeRawEncodedPsmJson"
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+declare -A OdePsmJson=([name]="topic.OdePsmJson" [collection]="OdePsmJson"
     [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
 
 function createSink() {
@@ -69,7 +91,20 @@ function createSink() {
     curl -X PUT http://localhost:8083/connectors/MongoSink.${name}/config -H "Content-Type: application/json" -d "$connectConfig"
 }
 
-createSink testing
+createSink OdeRawEncodedBSMJson
+createSink OdeBsmJson
+
+createSink OdeRawEncodedMAPJson
+createSink OdeMapJson
+
+createSink OdeRawEncodedSPATJson
+createSink OdeSpatJson
+
+createSink OdeRawEncodedTIMJson
+createSink OdeTimJson
+
+createSink OdeRawEncodedPsmJson
+createSink OdePsmJson
 
 echo "----------------------------------"
 echo "ODE Kafka connector creation complete!"
