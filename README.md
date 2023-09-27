@@ -141,7 +141,7 @@ Provided in the mongo-connector directory is a sample configuration shell script
 declare -A config_name=([name]="topic_name" [collection]="mongo_collection_name"
     [convert_timestamp]=true [timefield]="timestamp" [use_key]=true [key]="key")
 ```
-The format above describes the basic configuration for configuring a sink connector. In general we recommend to keep the MongoDB collection name the same as the topic name to avoid confusion. Additionally, if there is a top level timefield set `convert_timestamp` to true and then specify the time field name that appears in the message. This will allow MongoDB to transform that message into a date object to allow for TTL creation and reduce message size. To override MongoDB's default message `_id` field, set `use_key` to true and then set the `key` property to "key".
+The format above describes the basic configuration for configuring a sink connector, this should be placed at the beginning of the connect_start.sh file. In general we recommend to keep the MongoDB collection name the same as the topic name to avoid confusion. Additionally, if there is a top level timefield set `convert_timestamp` to true and then specify the time field name that appears in the message. This will allow MongoDB to transform that message into a date object to allow for TTL creation and reduce message size. To override MongoDB's default message `_id` field, set `use_key` to true and then set the `key` property to "key".
 
 After the sink connector is configured above, then make sure to call the createSink function with the config_name of the configuration like so:
 ``` shell

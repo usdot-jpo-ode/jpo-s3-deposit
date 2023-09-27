@@ -1,3 +1,4 @@
+# NOTE: This docker-compose spins up kafka, MongoDB, and a kafka-connect pod. This does NOT start up the S3-depositor module.
 version: '3'
 services:
   zookeeper:

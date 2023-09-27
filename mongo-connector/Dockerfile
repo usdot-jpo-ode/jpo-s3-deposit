@@ -1,3 +1,4 @@
+# Note that this image requires a version of Mongodb of 3.6 or later
 FROM confluentinc/cp-kafka-connect:6.1.9
 
 COPY connect_start.sh /scripts/connect_start.sh
