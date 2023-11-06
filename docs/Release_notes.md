@@ -1,6 +1,18 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.3.0, released November 2023
+----------------------------------------
+
+### **Summary**
+The updates for the jpo-s3-deposit 1.3.0 release consist of fixed GitHub workflow job names and adjustments to the run.sh script to reference the correct JAR file.
+- Fixed github workflow job names.
+- The run.sh script has been modified to point to the accurate JAR file.
+
+Known Issues:
+- No known issues at this time.
+
+
 Version 1.2.0, released July 5th 2023
 ----------------------------------------
 
