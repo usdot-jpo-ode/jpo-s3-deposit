@@ -7,7 +7,7 @@ on:
       - "master"
       - "release/*"
 jobs:
-  jpo-security-svcs:
+  jpo-s3-deposit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
