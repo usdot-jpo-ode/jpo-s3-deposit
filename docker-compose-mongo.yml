@@ -46,6 +46,7 @@ services:
         condition: service_healthy
     environment:
       MONGO_URI: mongodb://${MONGO_IP}:${MONGO_PORT}/?replicaSet=rs0
+      MONGO_DB_NAME: ODE
       CONNECT_BOOTSTRAP_SERVERS: ${DOCKER_HOST_IP}:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_REST_PORT: 8083

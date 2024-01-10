@@ -53,7 +53,7 @@ function createSink() {
         "tasks.max":3,
         "topics":"'$name'",
         "connection.uri":"'$MONGO_URI'",
-        "database":"ODE",
+        "database":"'$MONGO_DB_NAME'",
         "collection":"'$collection'",
         "key.converter":"org.apache.kafka.connect.storage.StringConverter",
         "key.converter.schemas.enable":false,
