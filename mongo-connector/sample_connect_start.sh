@@ -4,29 +4,29 @@ echo "Kafka connector creation started."
 echo "------------------------------------------"
 
 declare -A OdeRawEncodedBSMJson=([name]="topic.OdeRawEncodedBSMJson" [collection]="OdeRawEncodedBSMJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 declare -A OdeBsmJson=([name]="topic.OdeBsmJson" [collection]="OdeBsmJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 
 declare -A OdeRawEncodedMAPJson=([name]="topic.OdeRawEncodedMAPJson" [collection]="OdeRawEncodedMAPJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 declare -A OdeMapJson=([name]="topic.OdeMapJson" [collection]="OdeMapJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 
 declare -A OdeRawEncodedSPATJson=([name]="topic.OdeRawEncodedSPATJson" [collection]="OdeRawEncodedSPATJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 declare -A OdeSpatJson=([name]="topic.OdeSpatJson" [collection]="OdeSpatJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 
 declare -A OdeRawEncodedTIMJson=([name]="topic.OdeRawEncodedTIMJson" [collection]="OdeRawEncodedTIMJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 declare -A OdeTimJson=([name]="topic.OdeTimJson" [collection]="OdeTimJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 
 declare -A OdeRawEncodedPsmJson=([name]="topic.OdeRawEncodedPsmJson" [collection]="OdeRawEncodedPsmJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 declare -A OdePsmJson=([name]="topic.OdePsmJson" [collection]="OdePsmJson"
-    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="")
+    [convert_timestamp]=false [timefield]="" [use_key]=false [key]="" [add_timestamp]=true)
 
 function createSink() {
     local -n topic=$1
@@ -36,6 +36,7 @@ function createSink() {
     local convert_timestamp=${topic[convert_timestamp]}
     local use_key=${topic[use_key]}
     local key=${topic[key]}
+    local add_timestamp=${topic[add_timestamp]}
 
     echo "Creating sink connector with parameters:"
     echo "name=$name"
@@ -44,6 +45,7 @@ function createSink() {
     echo "convert_timestamp=$convert_timestamp"
     echo "use_key=$use_key"
     echo "key=$key"
+    echo "add_timestamp=$add_timestamp"
 
     local connectConfig=' {
         "group.id":"connector-consumer",
@@ -59,11 +61,10 @@ function createSink() {
         "value.converter.schemas.enable":false,
         "errors.tolerance": "all",
         "mongo.errors.tolerance": "all",
-        "errors.deadletterqueue.topic.name": "dlq.'$collection'.sink",
-        "errors.deadletterqueue.context.headers.enable": true,
-        "errors.log.enable": true,
-        "errors.log.include.messages": true,
-        "errors.deadletterqueue.topic.replication.factor": 1'    
+        "errors.deadletterqueue.topic.name": "",
+	    "errors.log.enable": false,
+        "errors.log.include.messages": false,
+	    "errors.deadletterqueue.topic.replication.factor": 0' 
 
 
     if [ "$convert_timestamp" == true ]
@@ -73,6 +74,17 @@ function createSink() {
         "transforms.TimestampConverter.field": "'$timefield'",
         "transforms.TimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
         "transforms.TimestampConverter.target.type": "Timestamp"'
+    fi
+
+    if [ "$add_timestamp" == true ]
+    then
+        local connectConfig=''$connectConfig',
+        "transforms": "AddTimestamp,AddedTimestampConverter",
+        "transforms.AddTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+        "transforms.AddTimestamp.timestamp.field": "recordGeneratedAt",
+        "transforms.AddedTimestampConverter.field": "recordGeneratedAt",
+        "transforms.AddedTimestampConverter.type": "org.apache.kafka.connect.transforms.TimestampConverter$Value",
+        "transforms.AddedTimestampConverter.target.type": "Timestamp"'
     fi
 
     if [ "$use_key" == true ]
