@@ -1,4 +1,4 @@
-FROM maven:3.5.4-jdk-8-alpine as builder
+FROM maven:3.8-eclipse-temurin-21-alpine as builder
 MAINTAINER 583114@bah.com
 
 WORKDIR /home
@@ -7,7 +7,7 @@ COPY ./src ./src
 
 RUN mvn clean package assembly:single
 
-FROM eclipse-temurin:11-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 COPY --from=builder /home/src/main/resources/logback.xml /home
 COPY --from=builder /home/src/main/resources/log4j.properties /home
