@@ -48,13 +48,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -100,26 +93,27 @@ public class AwsDepositor {
 	}
 
 	public void run(String[] args) throws Exception {
-		CommandLine cmd = commandLineOptions(args);
-
-		endpoint = cmd.getOptionValue("bootstrap-server");
-		topic = cmd.getOptionValue("topic");
-		group = cmd.getOptionValue("group");
-		destination = cmd.getOptionValue("destination", "firehose");
-		waitOpt = cmd.hasOption("w");
+		endpoint = getEnvironmentVariable("BOOTSTRAP_SERVER");
+		topic = getEnvironmentVariable("DEPOSIT_TOPIC");
+		group = getEnvironmentVariable("DEPOSIT_GROUP");
+		destination = System.getProperty("DESTINATION", "firehose");
+		if (System.getenv("WAIT") != null && System.getenv("WAIT") != "") 
+		{ waitOpt = true; } 
+		else 
+		{ waitOpt = false; }
 
 		// S3 properties
-		bucketName = cmd.getOptionValue("bucket-name");
-		awsRegion = cmd.getOptionValue("region", "us-east-1");
-		keyName = cmd.getOptionValue("key-name");
+		bucketName = getEnvironmentVariable("DEPOSIT_BUCKET_NAME");
+		awsRegion = System.getProperty("REGION", "us-east-1");
+		keyName = getEnvironmentVariable("DEPOSIT_KEY_NAME");
 
-		K_AWS_ACCESS_KEY_ID = cmd.getOptionValue("k-aws-key", "AccessKeyId");
-		K_AWS_SECRET_ACCESS_KEY = cmd.getOptionValue("k-aws-secret-key", "SecretAccessKey");
-		K_AWS_SESSION_TOKEN = cmd.getOptionValue("k-aws-session-token", "SessionToken");
-		K_AWS_EXPIRATION = cmd.getOptionValue("k-aws-expiration", "Expiration");
-		API_ENDPOINT = cmd.getOptionValue("token-endpoint", "");
-		HEADER_Accept = cmd.getOptionValue("header-accept", "application/json");
-		HEADER_X_API_KEY = cmd.getOptionValue("header-x-api-key");
+		K_AWS_ACCESS_KEY_ID = System.getProperty("K_AWS_ACCESS_KEY_ID", "AccessKeyId");
+		K_AWS_SECRET_ACCESS_KEY = System.getProperty("K_AWS_SECRET_ACCESS_SECRET", "SecretAccessKey");
+		K_AWS_SESSION_TOKEN = System.getProperty("K_AWS_SESSION_TOKEN", "SessionToken");
+		K_AWS_EXPIRATION = System.getProperty("K_AWS_EXPIRATION", "Expiration");
+		API_ENDPOINT = System.getProperty("API_ENDPOINT", "");
+		HEADER_Accept = System.getProperty("HEADER_ACCEPT", "application/json");
+		HEADER_X_API_KEY = getEnvironmentVariable("HEADER_X_API_KEY");
 
 		logger.debug("Bucket name: {}", bucketName);
 		logger.debug("AWS Region: {}", awsRegion);
@@ -326,88 +320,6 @@ public class AwsDepositor {
 		}
 	}
 
-	private CommandLine commandLineOptions(String[] args) throws ParseException {
-		// Option parsing
-		Options options = new Options();
-
-		Option destination_option = new Option("d", "destination", true,
-				"Optional, destination defaults to Firehose. Enter \"s3\" to override");
-		destination_option.setRequired(false);
-		destination_option.setOptionalArg(true);
-		options.addOption(destination_option);
-
-		Option bucket_name_option = new Option("b", "bucket-name", true, "Bucket Name");
-		bucket_name_option.setRequired(true);
-		options.addOption(bucket_name_option);
-
-		Option region_option = new Option("r", "region", true, "AWS Region");
-		region_option.setRequired(false);
-		region_option.setOptionalArg(true);
-		options.addOption(region_option);
-
-		Option key_name_option = new Option("k", "key-name", true, "Key Name");
-		key_name_option.setRequired(true);
-		options.addOption(key_name_option);
-
-		Option bootstrap_server = new Option("s", "bootstrap-server", true, "Endpoint ('ip:port')");
-		bootstrap_server.setRequired(true);
-		options.addOption(bootstrap_server);
-
-		Option topic_option = new Option("t", "topic", true, "Topic Name");
-		topic_option.setRequired(true);
-		options.addOption(topic_option);
-
-		Option group_option = new Option("g", "group", true, "Consumer Group");
-		group_option.setRequired(true);
-		options.addOption(group_option);
-
-		Option wait_option = new Option("w", "wait", false, "Wait for AWS deposit results");
-		wait_option.setRequired(false);
-		options.addOption(wait_option);
-
-		Option aws_key_option = new Option("i", "k-aws-key", false, "AWS access key id name");
-		aws_key_option.setRequired(false);
-		options.addOption(aws_key_option);
-
-		Option aws_secret_key_option = new Option("a", "k-aws-secret-key", false, "AWS secret access key name");
-		aws_secret_key_option.setRequired(false);
-		options.addOption(aws_secret_key_option);
-
-		Option aws_token_option = new Option("n", "k-aws-session-token", false, "AWS session token name");
-		aws_token_option.setRequired(false);
-		options.addOption(aws_token_option);
-
-		Option aws_expiration_option = new Option("e", "k-aws-expiration", false, "AWS expiration name");
-		aws_expiration_option.setRequired(false);
-		options.addOption(aws_expiration_option);
-
-		Option token_endpoint_option = new Option("u", "token-endpoint", true, "API token endpoint");
-		token_endpoint_option.setRequired(false);
-		options.addOption(token_endpoint_option);
-
-		Option header_accept_option = new Option("h", "header-accept", true, "Header Accept");
-		header_accept_option.setRequired(false);
-		options.addOption(header_accept_option);
-
-		Option header_x_key_option = new Option("x", "header-x-api-key", true, "Header X API key");
-		header_x_key_option.setRequired(false);
-		options.addOption(header_x_key_option);
-
-		CommandLineParser parser = new DefaultParser();
-		HelpFormatter formatter = new HelpFormatter();
-		CommandLine cmd;
-
-		try {
-			cmd = parser.parse(options, args);
-		} catch (ParseException e) {
-			logger.debug(e.getMessage());
-			formatter.printHelp("JPO Firehose and S3 Depositor", options);
-			throw e;
-			// System.exit(1);
-		}
-		return cmd;
-	}
-
 	private AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
 		// Default is to deposit to Kinesis/Firehose, override via .env
 		// variables if S3 deposit desired
@@ -482,7 +394,7 @@ public class AwsDepositor {
 	}
 
 	private static String getEnvironmentVariable(String variableName) {
-		String value = System.getenv(variableName);
+		String value = System.getProperty(variableName);
 		if (value == null || value.equals("")) {
 		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
 		}
