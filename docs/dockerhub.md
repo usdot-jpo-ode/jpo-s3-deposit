@@ -4,7 +4,7 @@
 https://github.com/usdot-jpo-ode/jpo-s3-deposit
 
 ## Purpose
-The purpose of the jpo-s3-deposit program is to deposit messages to an Amazon S3 bucket or some other destination.
+The purpose of the jpo-s3-deposit program is to deposit messages to permanent storage, such as an Amazon S3 bucket, MongoDB instance or other similar system.
 
 ## How to pull the latest image
 The latest image can be pulled using the following command:
