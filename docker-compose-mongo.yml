@@ -17,22 +17,27 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
+  # WARNING: This is a development instance. Do not use this in production.
+  # There is no Authentication or Encryption to this MongoDB instance.
   mongodb_container:
     image: mongo:6
     environment:
-      - MONGO_REPLICA_SET_NAME=rs0
-      - MONGO_IP=${MONGO_IP}
+      MONGO_REPLICA_SET_NAME: rs0
+      MONGO_IP: ${MONGO_IP}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_COLLECTION_TTL: ${MONGO_COLLECTION_TTL}
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data_container:/MongoDB_data/db
+      - ./mongo-connector/a_init_replicas.js:/docker-entrypoint-initdb.d/a_init_replicas.js
+      - ./mongo-connector/b_create_indexes.js:/docker-entrypoint-initdb.d/b_create_indexes.js
     healthcheck:
       test: | 
         test $$(mongosh --quiet --eval "try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '${MONGO_IP}' }] }).ok } catch (_) { rs.status().ok }") -eq 1
       interval: 10s
       start_period: 30s
     command: ["--replSet", "rs0", "--bind_ip_all"]
-
 
   kafka-connect:
     image: cp-kafka-connect:6.1.9
@@ -45,8 +50,8 @@ services:
       mongodb_container:
         condition: service_healthy
     environment:
-      MONGO_URI: mongodb://${MONGO_IP}:${MONGO_PORT}/?replicaSet=rs0
-      MONGO_DB_NAME: ODE
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
       CONNECT_BOOTSTRAP_SERVERS: ${DOCKER_HOST_IP}:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_REST_PORT: 8083
@@ -69,20 +74,8 @@ services:
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=ERROR,org.reflections=ERROR,com.mongodb.kafka=ERROR"
       CONNECT_PLUGIN_PATH: /usr/share/confluent-hub-components
       CONNECT_ZOOKEEPER_CONNECT: "zookeeper:2181"
-    command:
-      - bash
-      - -c
-      - |
-        /etc/confluent/docker/run & 
-        echo "Waiting for Kafka Connect to start listening on kafka-connect ❳"
-        while [ $$(curl -s -o /dev/null -w %{http_code} http://localhost:8083/connectors) -eq 000 ] ; do 
-          echo -e $$(date) " Kafka Connect listener HTTP state: " $$(curl -s -o /dev/null -w %{http_code} http://localhost:8083/connectors) " (waiting for 200)"
-          sleep 5
-        done
-        sleep 10
-        echo -e "\n--\n+> Creating Kafka Connect MongoDB sink"
-        bash /scripts/connect_start.sh
-        sleep infinity
-
+    volumes:
+      - ./mongo-connector/connect_start.sh:/scripts/connect_start.sh
+        
 volumes:
   mongodb_data_container:
