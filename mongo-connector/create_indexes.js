@@ -3,7 +3,6 @@
 /*
 This is the second script responsible for configuring mongoDB automatically on startup.
 This script is responsible for creating collections, adding indexes and TTLs
-For more information see the header in a_init_replicas.js
 */
 
 console.log("");
@@ -37,19 +36,10 @@ const collections = [
 ];
 
 try{
-    db.getMongo().setReadPref("primaryPreferred");
     db = db.getSiblingDB(dbName);
-    db.getMongo().setReadPref("primaryPreferred");
-    var isMaster = db.isMaster();
-    if (isMaster.primary) {
-        print("Connected to the primary replica set member.");
-    } else {
-        print("Not connected to the primary replica set member. Current node: " + isMaster.host);
-    }
-} 
-catch(err){
-    console.log("Could not switch DB to Sibling DB");
-    console.log(err);
+    print("Connected to the MongoDB instance.");
+} catch (error) {
+    print("Error connecting to the MongoDB instance: " + error);
 }
 
 

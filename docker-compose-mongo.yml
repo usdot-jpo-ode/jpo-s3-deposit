@@ -13,7 +13,7 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: ${DOCKER_HOST_IP}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "testing:1:1"
+      KAFKA_CREATE_TOPICS: "topic.OdeSpatJson:1:1,topic.OdeBsmJson:1:1,topic.OdeTimJson:1:1,topic.OdePsmJson:1:1,topic.OdeRawEncodedPsmJson,topic.OdeRawEncodedBSMJson:1:1,topic.OdeRawEncodedSPATJson:1:1,topic.OdeRawEncodedTIMJson:1:1,topic.OdeRawEncodedMAPJson:1:1,topic.OdeMapJson:1:1,topic.OdeRawEncodedPSMJson:1:1,topic.OdePsmJson:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -22,7 +22,8 @@ services:
   mongodb_container:
     image: mongo:6
     environment:
-      MONGO_REPLICA_SET_NAME: rs0
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_PASS}
       MONGO_IP: ${MONGO_IP}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_COLLECTION_TTL: ${MONGO_COLLECTION_TTL}
@@ -30,14 +31,12 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data_container:/MongoDB_data/db
-      - ./mongo-connector/a_init_replicas.js:/docker-entrypoint-initdb.d/a_init_replicas.js
-      - ./mongo-connector/b_create_indexes.js:/docker-entrypoint-initdb.d/b_create_indexes.js
+      - ./mongo-connector/create_indexes.js:/docker-entrypoint-initdb.d/create_indexes.js
     healthcheck:
       test: | 
-        test $$(mongosh --quiet --eval "try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '${MONGO_IP}' }] }).ok } catch (_) { rs.status().ok }") -eq 1
+        echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
-    command: ["--replSet", "rs0", "--bind_ip_all"]
 
   kafka-connect:
     image: cp-kafka-connect:6.1.9
