@@ -12,4 +12,3 @@ consumer-example.iml
 /*.log
 
 .env
-connect_start.sh
