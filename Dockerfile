@@ -13,9 +13,6 @@ COPY --from=builder /home/src/main/resources/logback.xml /home
 COPY --from=builder /home/src/main/resources/log4j.properties /home
 COPY --from=builder /home/target/jpo-aws-depositor-jar-with-dependencies.jar /home
 
-# Set the environment variables
-ENV BOOTSTRAP_SERVER={$DOCKER_HOST_IP}:9092
-
 
 CMD java -Dlogback.configurationFile=/home/logback.xml \
 	-jar /home/jpo-aws-depositor-jar-with-dependencies.jar \
