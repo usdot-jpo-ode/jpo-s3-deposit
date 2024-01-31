@@ -93,27 +93,27 @@ public class AwsDepositor {
 	}
 
 	public void run(String[] args) throws Exception {
-		endpoint = getEnvironmentVariable("BOOTSTRAP_SERVER");
-		topic = getEnvironmentVariable("DEPOSIT_TOPIC");
-		group = getEnvironmentVariable("DEPOSIT_GROUP");
-		destination = System.getProperty("DESTINATION", "firehose");
+		endpoint = getEnvironmentVariable("BOOTSTRAP_SERVER", "");
+		topic = getEnvironmentVariable("DEPOSIT_TOPIC", "");
+		group = getEnvironmentVariable("DEPOSIT_GROUP", "");
+		destination = getEnvironmentVariable("DESTINATION", "firehose");
 		if (System.getenv("WAIT") != null && System.getenv("WAIT") != "") 
 		{ waitOpt = true; } 
 		else 
 		{ waitOpt = false; }
 
 		// S3 properties
-		bucketName = getEnvironmentVariable("DEPOSIT_BUCKET_NAME");
-		awsRegion = System.getProperty("REGION", "us-east-1");
-		keyName = getEnvironmentVariable("DEPOSIT_KEY_NAME");
+		bucketName = getEnvironmentVariable("DEPOSIT_BUCKET_NAME", "");
+		awsRegion = getEnvironmentVariable("REGION", "us-east-1");
+		keyName = getEnvironmentVariable("DEPOSIT_KEY_NAME", "");
 
-		K_AWS_ACCESS_KEY_ID = System.getProperty("K_AWS_ACCESS_KEY_ID", "AccessKeyId");
-		K_AWS_SECRET_ACCESS_KEY = System.getProperty("K_AWS_SECRET_ACCESS_SECRET", "SecretAccessKey");
-		K_AWS_SESSION_TOKEN = System.getProperty("K_AWS_SESSION_TOKEN", "SessionToken");
-		K_AWS_EXPIRATION = System.getProperty("K_AWS_EXPIRATION", "Expiration");
-		API_ENDPOINT = System.getProperty("API_ENDPOINT", "");
-		HEADER_Accept = System.getProperty("HEADER_ACCEPT", "application/json");
-		HEADER_X_API_KEY = getEnvironmentVariable("HEADER_X_API_KEY");
+		K_AWS_ACCESS_KEY_ID = getEnvironmentVariable("AWS_ACCESS_KEY_ID", "AccessKeyId");
+		K_AWS_SECRET_ACCESS_KEY = getEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "SecretAccessKey");
+		K_AWS_SESSION_TOKEN = getEnvironmentVariable("AWS_SESSION_TOKEN", "SessionToken");
+		K_AWS_EXPIRATION = getEnvironmentVariable("AWS_EXPIRATION", "Expiration");
+		API_ENDPOINT = getEnvironmentVariable("API_ENDPOINT", "");
+		HEADER_Accept = getEnvironmentVariable("HEADER_ACCEPT", "application/json");
+		HEADER_X_API_KEY = getEnvironmentVariable("HEADER_X_API_KEY", "");
 
 		logger.debug("Bucket name: {}", bucketName);
 		logger.debug("AWS Region: {}", awsRegion);
@@ -213,8 +213,8 @@ public class AwsDepositor {
 		props.put("security.protocol", "SASL_SSL");
 		props.put("sasl.mechanism", "PLAIN");
   
-		String username = getEnvironmentVariable("CONFLUENT_KEY");
-		String password = getEnvironmentVariable("CONFLUENT_SECRET");
+		String username = getEnvironmentVariable("CONFLUENT_KEY", "");
+		String password = getEnvironmentVariable("CONFLUENT_SECRET", "");
   
 		if (username != null && password != null) {
 		   String auth = "org.apache.kafka.common.security.plain.PlainLoginModule required " +
@@ -393,10 +393,12 @@ public class AwsDepositor {
 		return jsonResult;
 	}
 
-	private static String getEnvironmentVariable(String variableName) {
-		String value = System.getProperty(variableName);
+	private static String getEnvironmentVariable(String variableName, String defaultValue) {
+		String value = System.getenv(variableName);
 		if (value == null || value.equals("")) {
 		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
+		   System.out.println("Using default value: " + defaultValue);
+		   return defaultValue;
 		}
 		return value;
 	 }
