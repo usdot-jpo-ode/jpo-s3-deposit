@@ -151,9 +151,16 @@ This needs to be put after the createSink function definition.
 
 ## Quick Run
 1. Create a copy of `sample.env` and rename it to `.env`.
-2. Update the variable `DOCKER_HOST_IP` to the local IP address of the system running docker.
+2. Update the variable `DOCKER_HOST_IP` to the local IP address of the system running docker and set an admin user password with the `MONGO_DB_PASS` variable.
    1. If connecting to a separately deployed mongo cluster make sure to specify the `MONGO_IP` and `MONGO_PORT`.
 3. Navigate back to the root directory and run the following command: `docker compose -f docker-compose-mongo.yml up -d`
 4. Using either a local kafka install or [kcat](https://github.com/edenhill/kcat) to produce a sample message to one of the sink topics. Optionally, you can separately run the [ODE](https://github.com/usdot-jpo-ode/jpo-ode) and process messages directly from it's output.
-5. Using [MongoDB Compass](https://www.mongodb.com/products/compass) or another DB visualizer connect to the MongoDB database using this connection string: `mongodb://localhost:27017`
+5. Using [MongoDB Compass](https://www.mongodb.com/products/compass) or another DB visualizer connect to the MongoDB database using this connection string: `mongodb://[admin_user]:[admin_password]@localhost:27017/`
 6. Now we are done! If everything is working properly you should see an ODE database with a collection for each kafka sink topic that contains messages.
+
+## Debugging
+If the Kafka connect image crashes with the following error:
+``` bash
+bash: /scripts/connect_wait.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+Please verify that the line endings in the ([connect_start.sh](./mongo-connector/connect_start.sh)) and ([connect_wait.sh](./mongo-connector/connect_wait.sh)) are set to LF instead of CRLF.
