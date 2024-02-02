@@ -21,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      BOOTSTRAP_SERVER: ${DOCKER_HOST_IP}:9092
+      BOOTSTRAP_SERVER: ${BOOTSTRAP_SERVER}
       API_ENDPOINT: ${API_ENDPOINT}
       DEPOSIT_TOPIC: ${DEPOSIT_TOPIC}
       DEPOSIT_GROUP: ${DEPOSIT_GROUP}
