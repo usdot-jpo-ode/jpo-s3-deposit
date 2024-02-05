@@ -4,12 +4,12 @@
 
   <groupId>usdot.jpo.ode</groupId>
   <artifactId>jpo-aws-depositor</artifactId>
-  <version>1.1.0</version>
+  <version>1.4.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>JPO AWS Depositor</name>
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
   <dependencies>
     <dependency>
@@ -81,7 +81,7 @@
         <!-- Build an executable JAR -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.5.0</version>
         <configuration>
           <archive>
             <manifest>
