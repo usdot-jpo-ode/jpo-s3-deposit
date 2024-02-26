@@ -10,3 +10,5 @@ consumer-example.iml
 /.settings/*
 /bin
 /*.log
+
+.env

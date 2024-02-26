@@ -1,6 +1,22 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.4.0, released February 2024
+----------------------------------------
+
+### **Summary**
+The changes for the jpo-s3-deposit 1.4.0 release include a log4j initialization fix, an update for Java, dockerhub image documentation & a MongoDB connector implementation.
+
+Enhancements in this release:
+- CDOT PR 12: Fixed log4j initialization issues
+- CDOT PR 11: Updated Java to v21
+- CDOT PR 10: Added dockerhub image documentation
+- CDOT PR 9: Implemented MongoDB Connector
+
+Known Issues:
+- No known issues at this time.
+
+
 Version 1.3.0, released November 2023
 ----------------------------------------
 
