@@ -92,6 +92,10 @@ public class AwsDepositor {
 	private String AWS_SESSION_TOKEN;
 	private String AWS_EXPIRATION;
 
+	private String KAFKA_ENABLE_AUTO_COMMIT;
+	private String KAFKA_AUTO_COMMIT_INTERVAL_MS;
+	private String KAFKA_SESSION_TIMEOUT_MS;
+
 	public static void main(String[] args) throws Exception {
 		AwsDepositor awsDepositor = new AwsDepositor();
 		awsDepositor.run(args);
@@ -154,10 +158,14 @@ public class AwsDepositor {
 			addConfluentProperties(props);
 		}
 
+		KAFKA_AUTO_COMMIT_INTERVAL_MS = getEnvironmentVariable("KAFKA_AUTO_COMMIT_INTERVAL_MS", "1000");
+		KAFKA_ENABLE_AUTO_COMMIT = getEnvironmentVariable("KAFKA_ENABLE_AUTO_COMMIT", "false");
+		KAFKA_SESSION_TIMEOUT_MS = getEnvironmentVariable("KAFKA_SESSION_TIMEOUT_MS", "30000");
+
 		props.put("group.id", group);
-		props.put("enable.auto.commit", "false");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("session.timeout.ms", "30000");
+		props.put("enable.auto.commit", KAFKA_ENABLE_AUTO_COMMIT);
+		props.put("auto.commit.interval.ms", KAFKA_AUTO_COMMIT_INTERVAL_MS);
+		props.put("session.timeout.ms", KAFKA_SESSION_TIMEOUT_MS);
 
 
 		boolean depositToS3 = false;
