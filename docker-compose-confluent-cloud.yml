@@ -24,5 +24,5 @@ services:
       CONFLUENT_SECRET: ${CONFLUENT_SECRET}
       GOOGLE_APPLICATION_CREDENTIALS: '/google/gcp_service_account.json'
     volumes:
-      - ${GOOGLE_APPLICATION_CREDENTIALS}:/google/gcp_service_account.json d
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/google/gcp_service_account.json
       

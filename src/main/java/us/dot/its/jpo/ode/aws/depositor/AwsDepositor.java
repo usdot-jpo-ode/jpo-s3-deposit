@@ -165,17 +165,19 @@ public class AwsDepositor {
 		AmazonKinesisFirehoseAsync firehose = null;
 		Storage gcsStorage = null;
 
-		if (destination != null && destination.equals("s3")) {
-			depositToS3 = true;
-			s3 = createS3Client(awsRegion);
-
-		} else if (destination != null && destination.equals("firehose")) {
-			firehose = buildFirehoseClient(awsRegion);
-		} else if (destination != null && destination.equals("gcs")) {
-			gcsStorage = StorageOptions.getDefaultInstance().getService();
-		} else {
-			logger.error("Invalid destination: " + destination);
-			System.exit(1);
+		if (destination != null) {
+			if (destination.equals("s3")) {
+				depositToS3 = true;
+				s3 = createS3Client(awsRegion);
+	
+			} else if (destination.equals("firehose")) {
+				firehose = buildFirehoseClient(awsRegion);
+			} else if (destination.equals("gcs")) {
+				gcsStorage = StorageOptions.getDefaultInstance().getService();
+			} else {
+				logger.error("Invalid destination: " + destination);
+				System.exit(1);
+			}
 		}
 
 

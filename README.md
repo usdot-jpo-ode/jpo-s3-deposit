@@ -1,9 +1,12 @@
-# AWS Deposit Service
+# Message Deposit Service
 
-This project is intended to serve as a  consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposits the resulting file into a predetermined Firehose/Kinesis, S3 Bucket, or Google Cloud Storage Bucket. This runs alongside the ODE and when deployed using Docker Compose, runs in a Docker container.
+This project is intended to serve as a consumer application to subscribe to a Kafka topic of streaming JSON, package the results as a JSON file, and deposit the resulting file into a predetermined Firehose/Kinesis, S3 Bucket, or Google Cloud Storage Bucket (GCS). This runs alongside the ODE and when deployed using Docker Compose, runs in a Docker container.
 
 ## Quick Run
 The use of AWS credentials is being read from the machine's environmental variables. You may also set them in your bash profile. Note that when using Docker Compose from the main `jpo-ode` repository, these variables are set in the `.env` present in that repo.
+
+If depositing to GCS, credentials are read from a JSON service account key file. A sample service account file can be found at ./resources/google/sample_gcp_service_account.json. 
+Please note that if depositing to GCS the service account will need the storage.buckets.get and storage.objects.create permissions.
 
 ```
 export K_AWS_ACCESS_KEY_ID = AccessKeyId
