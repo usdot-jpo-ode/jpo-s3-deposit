@@ -38,6 +38,9 @@ services:
       KAFKA_ENABLE_AUTO_COMMIT: ${KAFKA_ENABLE_AUTO_COMMIT}
       KAFKA_AUTO_COMMIT_INTERVAL_MS: ${KAFKA_AUTO_COMMIT_INTERVAL_MS}
       KAFKA_SESSION_TIMEOUT_MS: ${KAFKA_SESSION_TIMEOUT_MS}
+      GOOGLE_APPLICATION_CREDENTIALS: '/google/gcp_service_account.json'
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/google/gcp_service_account.json
     depends_on:
       - kafka
 
