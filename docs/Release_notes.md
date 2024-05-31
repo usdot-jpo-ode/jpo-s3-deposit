@@ -4,11 +4,12 @@ Jpo-s3-deposit Release Notes
 Version 1.5.0, released June 2024
 ----------------------------------------
 ### **Summary**
-The changes for the jpo-s3-deposit 1.5.0 release include updated hard-coded kafka properties to be configurable and added support for GCS BLOB storage.
+The changes for the jpo-s3-deposit 1.5.0 release include updated hard-coded kafka properties to be configurable, added support for GCS BLOB storage & an updated java version for the dev container.
 
 Enhancements in this release
 - CDOT PR 18: Updated hard-coded kafka properties to be configurable
 - CDOT PR 19: Added support for GCS BLOB storage
+- CDOT PR 22: Updated dev container java version to 21
 
 
 Version 1.4.0, released February 2024
