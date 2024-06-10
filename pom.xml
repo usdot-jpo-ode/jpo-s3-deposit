@@ -107,7 +107,7 @@
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://github.com/${github_organization}/jpo-s3-deposit</url>
+      <url>https://maven.pkg.github.com/${github_organization}/jpo-s3-deposit</url>
     </repository>
   </distributionManagement>
 </project>
