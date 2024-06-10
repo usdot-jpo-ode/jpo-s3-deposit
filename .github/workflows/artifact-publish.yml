@@ -1,14 +1,8 @@
 name: Publish Java Package
 
 on:
-  # commented out for testing
-  # release:
-  #   types: [created]
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+  release:
+    types: [created]
 
 jobs:
   build:
