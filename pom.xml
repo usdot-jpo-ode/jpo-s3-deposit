@@ -10,6 +10,8 @@
   <properties>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <!-- Allow override of github organization when publishing artifacts to github -->
+    <github_organization>usdot-jpo-ode</github_organization>
   </properties>
   <dependencies>
     <dependency>
@@ -101,4 +103,11 @@
       </plugin>
     </plugins>
   </build>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://github.com/${github_organization}/jpo-s3-deposit</url>
+    </repository>
+  </distributionManagement>
 </project>
