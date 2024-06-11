@@ -213,8 +213,8 @@ public class AwsDepositor {
 								}
 							} catch (Exception e) {
 								int retryTimeout = 5000;
-								logger.error("Error depositing to AWS. Retrying in " + retryTimeout / 1000 + " seconds",
-										e);
+								String destinationName = depositToS3 ? "S3" : destination;
+								logger.error("Error depositing to destination '" + destinationName + "'. Retrying in " + retryTimeout / 1000 + " seconds", e);
 								Thread.sleep(retryTimeout);
 							}
 						}
@@ -226,7 +226,7 @@ public class AwsDepositor {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Server Error. reconnecting to AWS ", e);
+				logger.error("Server Error. reconnecting to destination ", e);
 			} finally {
 				stringConsumer.close();
 			}
