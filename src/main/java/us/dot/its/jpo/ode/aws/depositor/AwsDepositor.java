@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -47,6 +48,10 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -86,6 +91,10 @@ public class AwsDepositor {
 	private String AWS_SECRET_ACCESS_KEY;
 	private String AWS_SESSION_TOKEN;
 	private String AWS_EXPIRATION;
+
+	private String KAFKA_ENABLE_AUTO_COMMIT;
+	private String KAFKA_AUTO_COMMIT_INTERVAL_MS;
+	private String KAFKA_SESSION_TIMEOUT_MS;
 
 	public static void main(String[] args) throws Exception {
 		AwsDepositor awsDepositor = new AwsDepositor();
@@ -149,22 +158,34 @@ public class AwsDepositor {
 			addConfluentProperties(props);
 		}
 
+		KAFKA_AUTO_COMMIT_INTERVAL_MS = getEnvironmentVariable("KAFKA_AUTO_COMMIT_INTERVAL_MS", "1000");
+		KAFKA_ENABLE_AUTO_COMMIT = getEnvironmentVariable("KAFKA_ENABLE_AUTO_COMMIT", "false");
+		KAFKA_SESSION_TIMEOUT_MS = getEnvironmentVariable("KAFKA_SESSION_TIMEOUT_MS", "30000");
+
 		props.put("group.id", group);
-		props.put("enable.auto.commit", "false");
-		props.put("auto.commit.interval.ms", "1000");
-		props.put("session.timeout.ms", "30000");
+		props.put("enable.auto.commit", KAFKA_ENABLE_AUTO_COMMIT);
+		props.put("auto.commit.interval.ms", KAFKA_AUTO_COMMIT_INTERVAL_MS);
+		props.put("session.timeout.ms", KAFKA_SESSION_TIMEOUT_MS);
 
 
 		boolean depositToS3 = false;
 		AmazonS3 s3 = null;
 		AmazonKinesisFirehoseAsync firehose = null;
-		if (destination != null && destination.equals("s3")) {
+		Storage gcsStorage = null;
+
+		if (destination.equals("s3")) {
 			depositToS3 = true;
 			s3 = createS3Client(awsRegion);
-
-		} else {
+		} else if (destination.equals("firehose")) {
 			firehose = buildFirehoseClient(awsRegion);
+		} else if (destination.equals("gcs")) {
+			// The file path specified by GOOGLE_APPLICATION_CREDENTIALS will be used here.
+			gcsStorage = StorageOptions.getDefaultInstance().getService();
+		} else {
+			logger.error("Invalid destination: " + destination);
+			System.exit(1);
 		}
+
 
 		while (true) {
 			KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
@@ -176,20 +197,25 @@ public class AwsDepositor {
 				boolean gotMessages = false;
 
 				while (true) {
-					ConsumerRecords<String, String> records = stringConsumer.poll(CONSUMER_POLL_TIMEOUT_MS);
+					ConsumerRecords<String, String> records = stringConsumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
 					if (records != null && !records.isEmpty()) {
 						for (ConsumerRecord<String, String> record : records) {
 							try {
 								gotMessages = true;
 								if (depositToS3) {
 									depositToS3(s3, record);
-								} else {
+								} else if (destination.equals("firehose")){
 									depositToFirehose(firehose, record);
+								} else if (destination.equals("gcs")) {
+									depositToGCS(gcsStorage, bucketName, record);
+								} else {
+									logger.error("Invalid destination: " + destination);
+									System.exit(1);
 								}
 							} catch (Exception e) {
 								int retryTimeout = 5000;
-								logger.error("Error depositing to AWS. Retrying in " + retryTimeout / 1000 + " seconds",
-										e);
+								String destinationName = depositToS3 ? "S3" : destination;
+								logger.error("Error depositing to destination '" + destinationName + "'. Retrying in " + retryTimeout / 1000 + " seconds", e);
 								Thread.sleep(retryTimeout);
 							}
 						}
@@ -201,7 +227,7 @@ public class AwsDepositor {
 					}
 				}
 			} catch (Exception e) {
-				logger.error("Server Error. reconnecting to AWS ", e);
+				logger.error("Server Error. reconnecting to destination ", e);
 			} finally {
 				stringConsumer.close();
 			}
@@ -317,6 +343,22 @@ public class AwsDepositor {
 					+ "such as not being able to access the network.");
 			logger.debug("Error Message: " + ace.getMessage());
 			throw ace;
+		}
+	}
+
+	private void depositToGCS(Storage gcsStorage, String depositBucket, ConsumerRecord<String, String> record) {
+		String recordValue = record.value();
+		Bucket bucket = gcsStorage.get(depositBucket);
+		byte[] bytes = recordValue.getBytes(Charset.defaultCharset());
+
+		long time = System.currentTimeMillis();
+		String timeStamp = Long.toString(time);
+
+		Blob blob = bucket.create(timeStamp, bytes);
+		if (blob != null) {
+			logger.debug("Record successfully uploaded to GCS");
+		} else {
+			logger.error("Failed to upload record to GCS bucket: " + recordValue);
 		}
 	}
 
