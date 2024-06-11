@@ -179,6 +179,7 @@ public class AwsDepositor {
 		} else if (destination.equals("firehose")) {
 			firehose = buildFirehoseClient(awsRegion);
 		} else if (destination.equals("gcs")) {
+			// The file path specified by GOOGLE_APPLICATION_CREDENTIALS will be used here.
 			gcsStorage = StorageOptions.getDefaultInstance().getService();
 		} else {
 			logger.error("Invalid destination: " + destination);
