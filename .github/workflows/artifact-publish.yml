@@ -1,13 +1,8 @@
 name: Publish Java Package
 
 on:
-  # release:
-  #   types: [created]
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
+  release:
+    types: [created]
 
 jobs:
   build:
