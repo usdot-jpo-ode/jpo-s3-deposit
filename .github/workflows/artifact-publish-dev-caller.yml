@@ -1,0 +1,16 @@
+name: Publish Java Package Snapshot
+
+on:
+  push:
+    branches:
+      - develop
+      - dev
+      - cicd-artifact-publishing
+
+jobs:
+  publish-java-package:
+    uses: ./.github/workflows/artifact-publish.yml
+    with:
+      drop-snapshot: false
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,15 @@
 name: Publish Java Package
 
 on:
-  release:
-    types: [created]
+  workflow_call:
+    inputs:
+      drop-snapshot:
+        description: 'Drop snapshot from version'
+        required: true
+        type: boolean
+    secrets:
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   build:
@@ -17,8 +24,9 @@ jobs:
       with:
         java-version: '21'
         distribution: 'adopt'
-    
+
     - name: Remove snapshot from version
+      if: ${{ github.event.inputs.drop-snapshot == 'true' }}
       run: mvn versions:set -DremoveSnapshot
 
     - name: Build with Maven
