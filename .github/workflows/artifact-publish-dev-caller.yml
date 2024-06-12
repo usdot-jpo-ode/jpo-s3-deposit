@@ -12,5 +12,3 @@ jobs:
     uses: ./.github/workflows/artifact-publish.yml
     with:
       drop-snapshot: false
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

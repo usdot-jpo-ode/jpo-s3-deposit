@@ -7,9 +7,6 @@ on:
         description: 'Drop snapshot from version'
         required: true
         type: boolean
-    secrets:
-      GITHUB_TOKEN:
-        required: true
 
 jobs:
   build:
