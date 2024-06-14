@@ -6,40 +6,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "S3D Local",
+            "name": "S3D",
             "request": "launch",
             "mainClass": "us.dot.its.jpo.ode.aws.depositor.AwsDepositor",
             "projectName": "jpo-aws-depositor",
-            "args": ["--bootstrap-server", "<kafka host>:9092",
-                    "-d", "s3",
-                     "-g", "testgroup",
-                     "-k", "testkey",
-                     "-b", "s3dtestbucket",
-                     "-t", "test"],
-            "env": {
-                "AWS_ACCESS_KEY_ID": "<access key id>",
-                "AWS_SECRET_KEY": "<access secret key>"
-            }
-        },
-        {
-            "type": "java",
-            "name": "S3D CC",
-            "request": "launch",
-            "mainClass": "us.dot.its.jpo.ode.aws.depositor.AwsDepositor",
-            "projectName": "jpo-aws-depositor",
-            "args": ["--bootstrap-server", "<kafka host host>:9092",
-                     "-g", "testgroup",
-                     "-t", "topic.OdeBsmJson",
-                     "-b", "s3dtestbucket",
-                     "-k", "testkey",
-                     "-d", "s3"],
-            "env": {
-                "AWS_ACCESS_KEY_ID": "<access key id>",
-                "AWS_SECRET_KEY": "<access secret key>",
-                "KAFKA_TYPE": "CONFLUENT",
-                "CONFLUENT_KEY": "<confluent key>",
-                "CONFLUENT_SECRET": "<confluent secret>"
-            }
+            "envFile": "${workspaceFolder}/.env",
         }
     ]
 }
