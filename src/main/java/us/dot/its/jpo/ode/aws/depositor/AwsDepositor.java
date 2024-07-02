@@ -26,9 +26,23 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -53,19 +67,6 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class AwsDepositor {
 	private final Logger logger = LoggerFactory.getLogger(AwsDepositor.class);
 	private final long CONSUMER_POLL_TIMEOUT_MS = 60000;
@@ -78,6 +79,8 @@ public class AwsDepositor {
 	private String awsRegion;
 	private String keyName;
 	private boolean waitOpt;
+
+	private boolean runDepositor = true;
 
 	private String K_AWS_ACCESS_KEY_ID;
 	private String K_AWS_SECRET_ACCESS_KEY;
@@ -98,45 +101,12 @@ public class AwsDepositor {
 
 	public static void main(String[] args) throws Exception {
 		AwsDepositor awsDepositor = new AwsDepositor();
-		awsDepositor.run(args);
+		awsDepositor.run();
 	}
 
-	public void run(String[] args) throws Exception {
-		endpoint = getEnvironmentVariable("BOOTSTRAP_SERVER", "");
-		topic = getEnvironmentVariable("DEPOSIT_TOPIC", "");
-		group = getEnvironmentVariable("DEPOSIT_GROUP", "");
-		destination = getEnvironmentVariable("DESTINATION", "firehose");
-		if (System.getenv("WAIT") != null && System.getenv("WAIT") != "") 
-		{ waitOpt = true; } 
-		else 
-		{ waitOpt = false; }
-
-		// S3 properties
-		bucketName = getEnvironmentVariable("DEPOSIT_BUCKET_NAME", "");
-		awsRegion = getEnvironmentVariable("REGION", "us-east-1");
-		keyName = getEnvironmentVariable("DEPOSIT_KEY_NAME", "");
-
-		K_AWS_ACCESS_KEY_ID = getEnvironmentVariable("AWS_ACCESS_KEY_ID", "AccessKeyId");
-		K_AWS_SECRET_ACCESS_KEY = getEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "SecretAccessKey");
-		K_AWS_SESSION_TOKEN = getEnvironmentVariable("AWS_SESSION_TOKEN", "SessionToken");
-		K_AWS_EXPIRATION = getEnvironmentVariable("AWS_EXPIRATION", "Expiration");
-		API_ENDPOINT = getEnvironmentVariable("API_ENDPOINT", "");
-		HEADER_Accept = getEnvironmentVariable("HEADER_ACCEPT", "application/json");
-		HEADER_X_API_KEY = getEnvironmentVariable("HEADER_X_API_KEY", "");
-
-		logger.debug("Bucket name: {}", bucketName);
-		logger.debug("AWS Region: {}", awsRegion);
-		logger.debug("Key name: {}", keyName);
-		logger.debug("Kafka topic: {}", topic);
-		logger.debug("Destination: {}", destination);
-		logger.debug("Wait: {}", waitOpt);
-		logger.debug("AWS_ACCESS_KEY_ID: {}", K_AWS_ACCESS_KEY_ID);
-		logger.debug("AWS_SECRET_ACCESS_KEY: {}", K_AWS_SECRET_ACCESS_KEY);
-		logger.debug("AWS_SESSION_TOKEN: {}", K_AWS_SESSION_TOKEN);
-		logger.debug("AWS_EXPIRATION: {}", K_AWS_EXPIRATION);
-		logger.debug("API_ENDPOINT: {}", API_ENDPOINT);
-		logger.debug("HEADER_Accept: {}", HEADER_Accept);
-		logger.debug("HEADER_X_API_KEY: {}", HEADER_X_API_KEY);
+	public void run() throws Exception {
+		// Pull in environment variables
+		depositorSetup();
 
 		if (API_ENDPOINT.length() > 0) {
 			JSONObject profile = generateAWSProfile();
@@ -187,8 +157,8 @@ public class AwsDepositor {
 		}
 
 
-		while (true) {
-			KafkaConsumer<String, String> stringConsumer = new KafkaConsumer<String, String>(props);
+		while (getRunDepositor()) {
+			KafkaConsumer<String, String> stringConsumer = getKafkaConsumer(props);
 
 			logger.debug("Subscribing to topic " + topic);
 			stringConsumer.subscribe(Arrays.asList(topic));
@@ -196,7 +166,7 @@ public class AwsDepositor {
 			try {
 				boolean gotMessages = false;
 
-				while (true) {
+				while (getRunDepositor()) {
 					ConsumerRecords<String, String> records = stringConsumer.poll(Duration.ofMillis(CONSUMER_POLL_TIMEOUT_MS));
 					if (records != null && !records.isEmpty()) {
 						for (ConsumerRecord<String, String> record : records) {
@@ -234,7 +204,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private static void addConfluentProperties(Properties props) {
+	static void addConfluentProperties(Properties props) {
 		props.put("ssl.endpoint.identification.algorithm", "https");
 		props.put("security.protocol", "SASL_SSL");
 		props.put("sasl.mechanism", "PLAIN");
@@ -250,7 +220,7 @@ public class AwsDepositor {
 		}
 	 }
 
-	private void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
+	void depositToFirehose(AmazonKinesisFirehoseAsync firehose, ConsumerRecord<String, String> record)
 			throws InterruptedException, ExecutionException, IOException {
 		try {
 			// IMPORTANT!!!
@@ -261,9 +231,8 @@ public class AwsDepositor {
 			ByteBuffer data = convertStringToByteBuffer(msg, Charset.defaultCharset());
 
 			// Check the expiration time for the profile credentials
-			LocalDateTime current_datetime = LocalDateTime.now();
-			LocalDateTime expiration_datetime = LocalDateTime.parse(AWS_EXPIRATION,
-					DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+			LocalDateTime current_datetime = getLocalDateTime();
+			LocalDateTime expiration_datetime = getExpirationDateTime();
 			System.out.println();
 			if (expiration_datetime.isBefore(current_datetime) && API_ENDPOINT.length() > 0) {
 				// If credential is expired, generate aws credentials
@@ -307,7 +276,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private void depositToS3(AmazonS3 s3, ConsumerRecord<String, String> record) throws IOException {
+	void depositToS3(AmazonS3 s3, ConsumerRecord<String, String> record) throws IOException {
 		try {
 			long time = System.currentTimeMillis();
 			String timeStamp = Long.toString(time);
@@ -346,7 +315,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private void depositToGCS(Storage gcsStorage, String depositBucket, ConsumerRecord<String, String> record) {
+	void depositToGCS(Storage gcsStorage, String depositBucket, ConsumerRecord<String, String> record) {
 		String recordValue = record.value();
 		Bucket bucket = gcsStorage.get(depositBucket);
 		byte[] bytes = recordValue.getBytes(Charset.defaultCharset());
@@ -362,7 +331,7 @@ public class AwsDepositor {
 		}
 	}
 
-	private AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
+	AmazonKinesisFirehoseAsync buildFirehoseClient(String awsRegion) {
 		// Default is to deposit to Kinesis/Firehose, override via .env
 		// variables if S3 deposit desired
 		logger.debug("=============================");
@@ -372,7 +341,7 @@ public class AwsDepositor {
 		return AmazonKinesisFirehoseAsyncClientBuilder.standard().withRegion(awsRegion).build();
 	}
 
-	private AmazonS3 createS3Client(String awsRegion) {
+	AmazonS3 createS3Client(String awsRegion) {
 		logger.debug("============== ========");
 		logger.debug("Connecting to Amazon S3");
 		logger.debug("=======================");
@@ -397,7 +366,7 @@ public class AwsDepositor {
 		return ByteBuffer.wrap(msg.getBytes(charset));
 	}
 
-	private File createSampleFile(String json) throws IOException {
+	File createSampleFile(String json) throws IOException {
 		File file = File.createTempFile("aws-java-sdk-", ".json");
 		file.deleteOnExit();
 
@@ -408,8 +377,8 @@ public class AwsDepositor {
 		return file;
 	}
 
-	private JSONObject generateAWSProfile() throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
+	JSONObject generateAWSProfile() throws IOException {
+		CloseableHttpClient client = getHttpClient();
 		HttpPost httpPost = new HttpPost(API_ENDPOINT);
 		JSONObject jsonResult = new JSONObject();
 		String json = "{}";
@@ -435,7 +404,9 @@ public class AwsDepositor {
 		return jsonResult;
 	}
 
-	private static String getEnvironmentVariable(String variableName, String defaultValue) {
+	static String getEnvironmentVariable(String variableName, String defaultValue) {
+		// get all environment variables
+		Map<String, String> env = System.getenv();
 		String value = System.getenv(variableName);
 		if (value == null || value.equals("")) {
 		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
@@ -445,4 +416,62 @@ public class AwsDepositor {
 		return value;
 	 }
 
+	 CloseableHttpClient getHttpClient() {
+		return HttpClients.createDefault();
+	 }
+
+	 LocalDateTime getLocalDateTime() {
+		return LocalDateTime.now();
+	 }
+
+	 LocalDateTime getExpirationDateTime() {
+		return LocalDateTime.parse(K_AWS_EXPIRATION,
+					DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	 }
+
+	 void depositorSetup() {
+		endpoint = getEnvironmentVariable("BOOTSTRAP_SERVER", "");
+		topic = getEnvironmentVariable("DEPOSIT_TOPIC", "");
+		group = getEnvironmentVariable("DEPOSIT_GROUP", "");
+		destination = getEnvironmentVariable("DESTINATION", "firehose");
+		if (System.getenv("WAIT") != null && System.getenv("WAIT") != "") 
+		{ waitOpt = true; } 
+		else 
+		{ waitOpt = false; }
+
+		// S3 properties
+		bucketName = getEnvironmentVariable("DEPOSIT_BUCKET_NAME", "");
+		awsRegion = getEnvironmentVariable("REGION", "us-east-1");
+		keyName = getEnvironmentVariable("DEPOSIT_KEY_NAME", "");
+
+		K_AWS_ACCESS_KEY_ID = getEnvironmentVariable("AWS_ACCESS_KEY_ID", "AccessKeyId");
+		K_AWS_SECRET_ACCESS_KEY = getEnvironmentVariable("AWS_SECRET_ACCESS_KEY", "SecretAccessKey");
+		K_AWS_SESSION_TOKEN = getEnvironmentVariable("AWS_SESSION_TOKEN", "SessionToken");
+		K_AWS_EXPIRATION = getEnvironmentVariable("AWS_EXPIRATION", "Expiration");
+		API_ENDPOINT = getEnvironmentVariable("API_ENDPOINT", "");
+		HEADER_Accept = getEnvironmentVariable("HEADER_ACCEPT", "application/json");
+		HEADER_X_API_KEY = getEnvironmentVariable("HEADER_X_API_KEY", "");
+
+		logger.debug("Bucket name: {}", bucketName);
+		logger.debug("AWS Region: {}", awsRegion);
+		logger.debug("Key name: {}", keyName);
+		logger.debug("Kafka topic: {}", topic);
+		logger.debug("Destination: {}", destination);
+		logger.debug("Wait: {}", waitOpt);
+		logger.debug("AWS_ACCESS_KEY_ID: {}", K_AWS_ACCESS_KEY_ID);
+		logger.debug("AWS_SECRET_ACCESS_KEY: {}", K_AWS_SECRET_ACCESS_KEY);
+		logger.debug("AWS_SESSION_TOKEN: {}", K_AWS_SESSION_TOKEN);
+		logger.debug("AWS_EXPIRATION: {}", K_AWS_EXPIRATION);
+		logger.debug("API_ENDPOINT: {}", API_ENDPOINT);
+		logger.debug("HEADER_Accept: {}", HEADER_Accept);
+		logger.debug("HEADER_X_API_KEY: {}", HEADER_X_API_KEY);
+	 }
+
+	 boolean getRunDepositor() {
+		return runDepositor;
+	 }
+
+	 KafkaConsumer<String, String> getKafkaConsumer(Properties props) {
+		return new KafkaConsumer<>(props);
+	 }
 }
