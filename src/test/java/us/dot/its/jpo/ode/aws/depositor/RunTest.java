@@ -71,18 +71,14 @@ public class RunTest {
 
         doNothing().when(depositor).depositToFirehose(any(), any());
 
-        // Create a list of ConsumerRecord<String, String>
         List<ConsumerRecord<String, String>> records = new ArrayList<>();
         records.add(new ConsumerRecord<>("topic", 0, 0, "test", "test-value"));
-
-        // Create a TopicPartition object for your topic and partition
+        
         TopicPartition topicPartition = new TopicPartition("topic", 0);
 
-        // Create a map of TopicPartition to List of ConsumerRecord
         Map<TopicPartition, List<ConsumerRecord<String, String>>> recordsMap = new HashMap<>();
         recordsMap.put(topicPartition, records);
 
-        // Initialize ConsumerRecords with the map
         ConsumerRecords<String, String> mockRecords = new ConsumerRecords<>(recordsMap);
 
         when(mockConsumer.poll(any())).thenReturn(mockRecords);
