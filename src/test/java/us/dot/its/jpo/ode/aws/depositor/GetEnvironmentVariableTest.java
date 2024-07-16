@@ -13,22 +13,19 @@ public class GetEnvironmentVariableTest {
     void testGetEnvironmentVariableExists() throws Exception {
         String expectedValue = "testValue";
 
-        // Test
+        // Test when the environment variable is set
         String result = AwsDepositor.getEnvironmentVariable(TEST_VARIABLE, "");
         assertEquals(expectedValue, result);
     }
 
     @Test
-    void testGetEnvironmentVariableNotSet() {
+    void testGetEnvironmentVariableNotSetOrEmpty() {
         // Test when the environment variable is not set
-        String result = AwsDepositor.getEnvironmentVariable(TEST_VARIABLE_NO_ENV, DEFAULT_VALUE);
-        assertEquals(DEFAULT_VALUE, result);
-    }
+        String notSetResult = AwsDepositor.getEnvironmentVariable(TEST_VARIABLE_NO_ENV, DEFAULT_VALUE);
+        assertEquals(DEFAULT_VALUE, notSetResult);
 
-    @Test
-    void testGetEnvironmentVariableEmpty() {
-        // Test
-        String result = AwsDepositor.getEnvironmentVariable(TEST_VARIABLE_EMPTY, DEFAULT_VALUE);
-        assertEquals(DEFAULT_VALUE, result);
+        // Test when the environment variable is empty
+        String emptyResult = AwsDepositor.getEnvironmentVariable(TEST_VARIABLE_EMPTY, DEFAULT_VALUE);
+        assertEquals(DEFAULT_VALUE, emptyResult);
     }
 }

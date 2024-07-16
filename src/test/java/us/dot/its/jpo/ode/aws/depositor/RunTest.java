@@ -16,9 +16,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import mockit.Verifications;
 
 public class RunTest {
     @Test
@@ -39,16 +39,10 @@ public class RunTest {
 
         doReturn(generateAwsReturnVal).when(depositor).generateAWSProfile();
 
-        new Verifications() {
-            {
-                depositor.getKafkaConsumer(any());
-                times = 1;
-                depositor.getRunDepositor();
-                times = 3;
-            }
-        };
-
         depositor.run();
+
+        verify(depositor, times(1)).getKafkaConsumer(any());
+        verify(depositor, times(4)).getRunDepositor();
     }
 
     @Test
@@ -83,17 +77,10 @@ public class RunTest {
 
         when(mockConsumer.poll(any())).thenReturn(mockRecords);
 
-        new Verifications() {
-            {
-                depositor.getKafkaConsumer(any());
-                times = 1;
-                depositor.getRunDepositor();
-                times = 3;
-                depositor.depositToFirehose(any(), any());
-                times = 1;
-            }
-        };
-
         depositor.run();
+
+        verify(depositor, times(1)).getKafkaConsumer(any());
+        verify(depositor, times(4)).getRunDepositor();
+        verify(depositor, times(1)).depositToFirehose(any(), any());
     }
 }

@@ -17,9 +17,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import mockit.Verifications;
 
 public class GenerateAWSProfileTest {
     @Test
@@ -44,17 +44,9 @@ public class GenerateAWSProfileTest {
     assertNotNull(result);
     assertEquals("value", result.getString("key"));
 
-    // Verify interactions
-    new Verifications() {{
-        mockClient.execute((HttpPost) any);
-        times = 1;
-
-        mockResponse.close();
-        times = 1;
-
-        mockClient.close();
-        times = 1;
-    }};
+    verify(mockClient, times(1)).execute((HttpPost) any());
+    verify(mockResponse, times(1)).close();
+    verify(mockClient, times(1)).close();
     }
 
     @Test
@@ -75,14 +67,5 @@ public class GenerateAWSProfileTest {
 
         // Verify the exception
         assertNotNull(exception);
-
-        // Verify interactions
-        new Verifications() {{
-            mockClient.execute((HttpPost) any);
-            times = 1;
-
-            mockClient.close();
-            times = 1;
-        }};
     }
 }
