@@ -8,7 +8,8 @@
   <packaging>jar</packaging>
   <name>JPO AWS Depositor</name>
   <properties>
-    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
     <jmockit.version>1.49</jmockit.version>
     <!-- Allow override of github organization when publishing artifacts to github -->
     <github_organization>usdot-jpo-ode</github_organization>
