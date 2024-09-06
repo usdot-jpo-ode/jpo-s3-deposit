@@ -1,6 +1,18 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.6.0, released September 2024
+----------------------------------------
+### **Summary**
+The changes for the jpo-s3-deposit 1.6.0 release include a GitHub action to publish a java artifact to the GitHub repository whenever a release is created, a change to the default value for the enable.auto.commit property to 'true', unit tests, and revised documentation for accuracy & clarity.
+
+Enhancements in this release:
+- CDOT PR 23: Added GitHub action to publish a java artifact to the GitHub repository whenever a release is created
+- CDOT PR 25: Changed default value for enable.auto.commit property to 'true'
+- CDOT PR 26: Added unit tests
+- CDOT PR 27: Revised documentation for accuracy & clarity
+
+
 Version 1.5.0, released June 2024
 ----------------------------------------
 ### **Summary**
