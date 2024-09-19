@@ -405,8 +405,6 @@ public class AwsDepositor {
 	}
 
 	static String getEnvironmentVariable(String variableName, String defaultValue) {
-		// get all environment variables
-		Map<String, String> env = System.getenv();
 		String value = System.getenv(variableName);
 		if (value == null || value.equals("")) {
 		   System.out.println("Something went wrong retrieving the environment variable " + variableName);
