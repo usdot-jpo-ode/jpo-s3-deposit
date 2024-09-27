@@ -1,0 +1,15 @@
+{
+    "java.test.config": {
+        "env": {
+            "TEST_VARIABLE": "testValue",
+            "TEST_VARIABLE_EMPTY": "",
+            "AWS_ACCESS_KEY_ID": "testAccessKey",
+            "AWS_SECRET_ACCESS_KEY": "testSecretKey",
+            "AWS_EXPIRATION": "2020-01-01 00:00:00",
+            "AWS_SESSION_TOKEN": "testSessionToken",
+            "API_ENDPOINT": "testApiEndpoint",
+            "CONFLUENT_KEY": "testConfluentKey",
+            "CONFLUENT_SECRET": "testConfluentSecret",
+        }
+    },
+}
