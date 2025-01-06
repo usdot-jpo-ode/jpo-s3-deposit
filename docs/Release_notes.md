@@ -1,6 +1,18 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.7.0, released January 2025
+----------------------------------------
+### **Summary**
+The jpo-s3-deposit 1.7.0 release updates GitHub Actions workflows with the latest versions of third-party actions from external repositories to eliminate Node.js and other deprecation warnings.
+
+Enhancements in this release:
+- USDOT PR 67: Update GitHub Actions Third-Party Action Versions
+
+Known Issues:
+- No known issues at this time.
+
+
 Version 1.6.0, released September 2024
 ----------------------------------------
 ### **Summary**
