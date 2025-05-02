@@ -1,7 +1,7 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
-Version 1.7.1, released June 2025
+Version 1.7.1, released May 2025
 ----------------------------------------
 ### **Summary**
 This release updates the Kafka version specified in the pom.xml file to one without any known vulnerabilities. Additionally, 
