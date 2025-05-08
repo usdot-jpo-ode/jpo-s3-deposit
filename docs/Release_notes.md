@@ -1,10 +1,21 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
+Version 1.7.1, released May 2025
+----------------------------------------
+### **Summary**
+This release updates the Kafka version specified in the pom.xml file to one without any known vulnerabilities. Additionally, 
+several Jackson packages have been added to the project.
+
+Enhancements in this release:
+- [CDOT PR 31](https://github.com/CDOT-CV/jpo-s3-deposit/pull/31): Update Kafka Version
+
+
 Version 1.7.0, released January 2025
 ----------------------------------------
 ### **Summary**
-The jpo-s3-deposit 1.7.0 release updates GitHub Actions workflows with the latest versions of third-party actions from external repositories to eliminate Node.js and other deprecation warnings.
+The jpo-s3-deposit 1.7.0 release updates GitHub Actions workflows with the latest versions of third-party actions from external 
+repositories to eliminate Node.js and other deprecation warnings.
 
 Enhancements in this release:
 - [USDOT PR 67](https://github.com/usdot-jpo-ode/jpo-s3-deposit/pull/67): Update GitHub Actions Third-Party Action Versions
@@ -16,7 +27,9 @@ Known Issues:
 Version 1.6.0, released September 2024
 ----------------------------------------
 ### **Summary**
-The changes for the jpo-s3-deposit 1.6.0 release include a GitHub action to publish a java artifact to the GitHub repository whenever a release is created, a change to the default value for the enable.auto.commit property to 'true', unit tests, and revised documentation for accuracy & clarity.
+The changes for the jpo-s3-deposit 1.6.0 release include a GitHub action to publish a java artifact to the GitHub repository whenever 
+a release is created, a change to the default value for the enable.auto.commit property to 'true', unit tests, and revised documentation 
+for accuracy & clarity.
 
 Enhancements in this release:
 - CDOT PR 23: Added GitHub action to publish a java artifact to the GitHub repository whenever a release is created
@@ -28,7 +41,8 @@ Enhancements in this release:
 Version 1.5.0, released June 2024
 ----------------------------------------
 ### **Summary**
-The changes for the jpo-s3-deposit 1.5.0 release include updated hard-coded Kafka properties to be configurable, added support for GCS BLOB storage & an updated Java version for the dev container.
+The changes for the jpo-s3-deposit 1.5.0 release include updated hard-coded Kafka properties to be configurable, added support for GCS 
+BLOB storage & an updated Java version for the dev container.
 
 Enhancements in this release
 - CDOT PR 18: Updated hard-coded Kafka properties to be configurable
@@ -43,7 +57,8 @@ Version 1.4.0, released February 2024
 ----------------------------------------
 
 ### **Summary**
-The changes for the jpo-s3-deposit 1.4.0 release include a log4j initialization fix, an update for Java, dockerhub image documentation & a MongoDB connector implementation.
+The changes for the jpo-s3-deposit 1.4.0 release include a log4j initialization fix, an update for Java, dockerhub image documentation & 
+a MongoDB connector implementation.
 
 Enhancements in this release:
 - CDOT PR 12: Fixed log4j initialization issues
@@ -59,7 +74,8 @@ Version 1.3.0, released November 2023
 ----------------------------------------
 
 ### **Summary**
-The updates for the jpo-s3-deposit 1.3.0 release consist of fixed GitHub workflow job names and adjustments to the run.sh script to reference the correct JAR file.
+The updates for the jpo-s3-deposit 1.3.0 release consist of fixed GitHub workflow job names and adjustments to the run.sh script to 
+reference the correct JAR file.
 - Fixed github workflow job names.
 - The run.sh script has been modified to point to the accurate JAR file.
 
@@ -78,7 +94,8 @@ Enhancements in this release:
 - CI/CD has been added.
 
 Known Issues
-- The `run.sh` script incorrectly references the built JAR and does not work at this time. The dockerfile correctly references the built JAR, however, so this is non-critical.
+- The `run.sh` script incorrectly references the built JAR and does not work at this time. The dockerfile correctly references the built 
+- JAR, however, so this is non-critical.
   
 Version 1.1.0, released Mar 30th 2023
 ----------------------------------------
