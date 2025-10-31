@@ -1,7 +1,7 @@
 Jpo-s3-deposit Release Notes
 ----------------------------
 
-Version 1.8.0, released October 2025
+Version 1.8.0, released November 2025
 ----------------------------------------
 ### **Summary**
 This release adds a workflow for issues created by external users and migrates to reusable GitHub workflows defined in the usdot-jpo-ode/actions repository.
