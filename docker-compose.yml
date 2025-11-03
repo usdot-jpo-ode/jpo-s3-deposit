@@ -4,6 +4,10 @@ services:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
   kafka:
     image: wurstmeister/kafka
